@@ -1,0 +1,24 @@
+package com.clusterwork.proto;  
+  
+option java_package = "com.clusterwork.protocol";  
+option java_outer_classname = "MasterNodeProtocolProtos";  
+  
+message Issued  {  	
+	required int32 version = 1;
+	enum TerminalType {
+    SERVER = 0;
+    NODE = 1;
+    ADMIN = 2;
+  }
+	required TerminalType terminal = 2[default = NODE];
+	required int64 Identity = 3;
+	required int32 command = 4;
+	optional bytes args = 5;
+} 
+
+message Response  {
+	required int64 Identity = 1;
+	required bool Complete = 2;
+	optional string msg = 3;
+	optional bytes args = 4;
+}
