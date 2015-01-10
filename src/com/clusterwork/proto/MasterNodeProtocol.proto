@@ -16,7 +16,14 @@ message Issued  {
 	optional bytes args = 5;
 } 
 
-message Response  {
+message NodeResponse  {
+	required int64 Identity = 1;
+	required bool Complete = 2;
+	optional string msg = 3;
+	optional bytes args = 4;
+}
+
+message MasterResponse  {
 	required int64 Identity = 1;
 	required bool Complete = 2;
 	optional string msg = 3;
