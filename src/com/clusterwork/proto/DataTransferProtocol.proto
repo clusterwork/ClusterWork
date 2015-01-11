@@ -1,0 +1,17 @@
+package com.clusterwork.proto;  
+  
+option java_package = "com.clusterwork.protocol";  
+option java_outer_classname = "DataTransferProtos";  
+  
+message DataBlock  {  	
+	required int32 version = 1;
+	enum TerminalType {
+    SERVER = 0;
+    NODE = 1;
+    ADMIN = 2;
+  }
+	required TerminalType terminal = 2[default = NODE];
+	required int64 Identity = 3;
+	required int32 command = 4;
+	optional bytes args = 5;
+} 
