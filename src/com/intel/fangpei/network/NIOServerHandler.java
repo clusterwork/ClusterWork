@@ -107,8 +107,6 @@ public class NIOServerHandler implements INIOHandler,Runnable{
 				argsize = 0; 
 		}
 
-	//}
-
 	@Override
 	public void processWrite() throws IOException {
 		while (waitWritePipeLine.hasNext()) {
@@ -118,17 +116,12 @@ public class NIOServerHandler implements INIOHandler,Runnable{
 				packet p = se.p;
 				SocketChannel channel = (SocketChannel) sk.channel();
 				int msgLen = p.getSerializedSize();
-				ByteBuffer buffer = ByteBuffer.allocate(Integer.SIZE+msgLen);
+				int totalLen = (Integer.SIZE/8)+msgLen;
+				ByteBuffer buffer = ByteBuffer.allocate(totalLen);
 				buffer.putInt(msgLen);
 				buffer.put(p.toByteArray());
 				buffer.flip();
 				send(channel,buffer);
-//				if (buffer != null) {
-//					int len = channel.write((ByteBuffer) buffer);
-//					System.out
-//							.println("[NIOServerHandler]write out packet:"
-//									+ p+",bytes:"+len);
-//				}
 			}
 
 		}
@@ -162,21 +155,21 @@ public class NIOServerHandler implements INIOHandler,Runnable{
 	}
 	private packet receive(SocketChannel channel) throws IOException {
 		buffer.clear();
-		buffer.limit(Integer.SIZE);
+		buffer.limit(Integer.SIZE/8);
 		channel.read(buffer);
 		if(buffer.position() == 0){
-			System.out.println("no data received");
+//			System.out.println("no data received");
 			return null;
 		}
 		buffer.flip();
 		int msgLen = buffer.getInt();
-		System.out.println("[NIOServerHandler]packet len:"+msgLen);
+//		System.out.println("[NIOServerHandler]packet len:"+msgLen);
 		buffer.clear();
 		buffer.limit(msgLen);
 		while(buffer.hasRemaining()){
 			channel.read(buffer);
 		}
-		System.out.println("[NIOServerHandler][receive]get buffer:"+buffer);
+//		System.out.println("[NIOServerHandler][receive]get buffer:"+buffer);
 		packet p = PacketProtocolImpl.CreatePacket(buffer);
 		return p;
 	}

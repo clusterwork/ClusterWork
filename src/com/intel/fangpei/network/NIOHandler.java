@@ -89,17 +89,13 @@ public class NIOHandler implements IConnection, INIOHandler, Runnable {
 		packet p = sendqueue.pop();
 		byte[] tmpArray = p.toByteArray();
 		int msgLen = tmpArray.length;
+		int totalLen = (Integer.SIZE/8)+msgLen;
 		buffer.clear();
-		buffer.limit(Integer.SIZE+msgLen);
-		System.out.println("buffer is:"+buffer+",limit:"+(Integer.SIZE+msgLen));
+		buffer.limit(totalLen);
 		buffer.putInt(msgLen);
-		System.out.println("buffer is:"+buffer);
 		buffer.put(tmpArray,0,msgLen);
-		System.out.println("buffer is:"+buffer);
 		buffer.flip();
-		System.out.println("buffer is:"+buffer);
 		send(buffer);
-		//System.out.println("[NIOHandler]processwrite:");
 	}
 
 	@Override
@@ -164,21 +160,21 @@ public class NIOHandler implements IConnection, INIOHandler, Runnable {
 	@Override
 	public packet receive() throws IOException {
 		buffer.clear();
-		buffer.limit(Integer.SIZE);
+		buffer.limit(Integer.SIZE/8);
 		channel.read(buffer);
 		if(buffer.position() == 0){
-			System.out.println("no data received");
+//			System.out.println("no data received");
 			return null;
 		}
 		buffer.flip();
 		int msgLen = buffer.getInt();
-		System.out.println("[NIOHandler]packet len:"+msgLen);
+		//System.out.println("[NIOHandler]packet len:"+msgLen);
 		buffer.clear();
 		buffer.limit(msgLen);
 		while(buffer.hasRemaining()){
 			channel.read(buffer);
 		}
-		System.out.println("[NIOHandler][receive]get buffer:"+buffer);
+		//System.out.println("[NIOHandler][receive]get buffer:"+buffer);
 		packet p = PacketProtocolImpl.CreatePacket(buffer);
 		return p;
 	}
