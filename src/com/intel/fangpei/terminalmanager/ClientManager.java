@@ -4,7 +4,9 @@ import java.nio.channels.SelectionKey;
 
 import com.intel.fangpei.BasicMessage.BasicMessage;
 import com.intel.fangpei.BasicMessage.HeartBeatMessage;
-import com.intel.fangpei.BasicMessage.packet;
+//import com.intel.fangpei.BasicMessage.packet;
+import com.clusterwork.protocol.PacketProtos.packet;
+import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
 import com.intel.fangpei.network.NIOServerHandler;
 import com.intel.fangpei.network.SelectionKeyManager;
 import com.intel.fangpei.util.SystemUtil;
@@ -21,7 +23,7 @@ public class ClientManager extends SlaveManager{
 	public boolean Handle(SelectionKey key,packet p){
 		//System.out.println("[ClientManager]handle this request");
 		this.key = key;
-		buffer = p.getBuffer();
+		buffer = p;
 		//System.out.println("[ClientManager]this client packet is:"+SystemUtil.byteToString(p.getArgs()));
 			unpacket();
 			if (clientType == BasicMessage.ADMIN) {
@@ -31,7 +33,7 @@ public class ClientManager extends SlaveManager{
 					return false;
 				}
 				if (command == BasicMessage.OP_LOGIN) {
-					packet p2 = new packet(BasicMessage.SERVER,BasicMessage.OP_MESSAGE,"[message]admin".getBytes());
+					packet p2 = PacketProtocolImpl.CreatePacket(BasicMessage.SERVER,BasicMessage.OP_MESSAGE,"[message]admin");
 					nioserverhandler.pushWriteSegement(key, p2);
 					keymanager.setAdmin(key);
 					ml.log("New admin login!");
@@ -43,12 +45,12 @@ public class ClientManager extends SlaveManager{
 					return false;
 				}
 				if (command == BasicMessage.OP_LOGIN) {
-					packet p2 = new packet(BasicMessage.SERVER,BasicMessage.OK," You have registered as a new Node".getBytes());
+					packet p2 = PacketProtocolImpl.CreatePacket(BasicMessage.SERVER,BasicMessage.OK," You have registered as a new Node");
 					nioserverhandler.pushWriteSegement(key, p2);
 					keymanager.addnode(key);
 				}
 				if(command ==BasicMessage.OP_SYSINFO){
-					nioserverhandler.pushWriteSegement(admin, new packet(buffer));
+					nioserverhandler.pushWriteSegement(admin, buffer);
 					//HashMap<String,String> hm = SysInfo.deserialize(args);
 					//System.out.println(hm.get("CPU_Vendor"));
 					//System.out.println(hm.get("Disk_info"));
@@ -57,14 +59,14 @@ public class ClientManager extends SlaveManager{
 				}
 				if(command ==BasicMessage.OP_MESSAGE){
 					System.out.println("[ClientManager]add NIO write interest for Admin");
-					nioserverhandler.pushWriteSegement(admin,  new packet(buffer));
+					nioserverhandler.pushWriteSegement(admin,  buffer);
 					return true;
 				}
 				//add what to do when get node heart beat call back segment
 				if(command == HeartBeatMessage.HEART_BEAT){
 				//	System.out.println("registe node key");
 				//	System.out.println(new String(args));
-					keymanager.registeHeartBeat(key,new String(args));
+					keymanager.registeHeartBeat(key,args.toStringUtf8());
 				//	System.out.println(key.toString()+"------"+keymanager.getAdmin().toString());
 					return true;
 				}

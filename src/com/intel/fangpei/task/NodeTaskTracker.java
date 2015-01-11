@@ -17,7 +17,9 @@ import java.util.Set;
 
 import com.ali.fangpei.service.wrapWork;
 import com.intel.fangpei.BasicMessage.BasicMessage;
-import com.intel.fangpei.BasicMessage.packet;
+//import com.intel.fangpei.BasicMessage.packet;
+import com.clusterwork.protocol.PacketProtos.packet;
+import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
 import com.intel.fangpei.logfactory.MonitorLog;
 import com.intel.fangpei.network.NIOServerHandler;
 import com.intel.fangpei.network.SelectionKeyManager;
@@ -113,12 +115,12 @@ public class NIOTrackerProcess implements Runnable{
 			packet p = se.p;
 			int jvmid = 0;
 			if(p.getCommand() == BasicMessage.OP_LOGIN){
-				jvmid = Integer.parseInt(new String(p.getArgs()));
+				jvmid = Integer.parseInt(p.getArgs().toStringUtf8());
 				registedJvm.put(jvmid,key);
 				System.out.println("[NIOTrackerProcess]new child connected!id is: "+jvmid);
 				continue;
 			}else if(p.getCommand() == BasicMessage.OP_QUIT){
-				jvmid = Integer.parseInt(new String(p.getArgs()));
+				jvmid = Integer.parseInt(p.getArgs().toStringUtf8());
 				registedJvm.remove(jvmid);
 				
 				//serverhandler.pushWriteSegement(key, new packet(BasicMessage.NODE, BasicMessage.OK));
@@ -147,6 +149,7 @@ public class NIOTrackerProcess implements Runnable{
 			}
 		}
 		public void send(int jvmId, packet p) {
+			System.out.println("[NodeTaskTracker]start send:"+p+" to "+jvmId);
 			SelectionKey key = registedJvm.get(jvmId);
 			if(key == null){
 				ml.error("we cann't find the Service JVM ,"
@@ -157,10 +160,8 @@ public class NIOTrackerProcess implements Runnable{
 			
 		}
 		public synchronized void send(int jvmId,SplitWork cr){
-			System.out.println("[TaskTracker]start send!");
 			packet p = cr.toTransfer();
 			send(jvmId,p);
-			System.out.println("[TaskTracker]sended!");
 		}
 		public synchronized void send(int jvmId,wrapWork ww){
 			packet p = ww.toTransfer();

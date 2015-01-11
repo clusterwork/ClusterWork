@@ -18,7 +18,9 @@ import com.intel.fangpei.BasicMessage.AppHandler;
 import com.intel.fangpei.BasicMessage.BasicMessage;
 import com.intel.fangpei.BasicMessage.HeartBeatMessage;
 import com.intel.fangpei.BasicMessage.ServiceMessage;
-import com.intel.fangpei.BasicMessage.packet;
+//import com.intel.fangpei.BasicMessage.packet;
+import com.clusterwork.protocol.PacketProtos.packet;
+import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
 import com.intel.fangpei.logfactory.MonitorLog;
 import com.intel.fangpei.network.NIOServerHandler;
 import com.intel.fangpei.network.SelectionKeyManager;
@@ -56,17 +58,17 @@ public class AdminManager extends SlaveManager {
 	}
 
 	public boolean Handle(SelectionKey admin, packet p) {
-		buffer = p.getBuffer();
+		buffer = p;
 		// System.out.println("task"+buffer.mark()+" "+buffer.limit()+" "+buffer.remaining());
 		unpacket();
 		if (args != null)
 			System.out.println("[AdminManager]"
 					+ ((SocketChannel) admin.channel()).socket()
 							.getInetAddress().getHostAddress() + ":"
-					+ new String(args) + "[end]");
+					+ args + "[end]");
 		if (command == BasicMessage.OP_QUIT) {
 			ml.log("handle admin's quit request");
-			packet one = new packet(BasicMessage.SERVER,
+			packet one = PacketProtocolImpl.CreatePacket(BasicMessage.SERVER,
 					BasicMessage.OP_MESSAGE, "offline");
 			nioserverhandler.pushWriteSegement(admin, one);
 			try {
@@ -90,19 +92,19 @@ public class AdminManager extends SlaveManager {
 	}
 
 	private void HandOneNode() {
-		String tmp = new String(args);
+		String tmp = args.toStringUtf8();
 		tmp = tmp.trim();
 		String[] meta = tmp.split(" ");
 		SelectionKey sk = keymanager.getOneNode(meta[0]);
 		try {
-			packet p = new packet(BasicMessage.SERVER, command,
-					tmp.substring(tmp.indexOf(" ")).getBytes());
+			packet p = PacketProtocolImpl.CreatePacket(BasicMessage.SERVER, command,
+					tmp.substring(tmp.indexOf(" ")));
 			nioserverhandler.pushWriteSegement(sk, p);
 		} catch (StringIndexOutOfBoundsException e) {
-			packet p = new packet(BasicMessage.SERVER, command);
+			packet p = PacketProtocolImpl.CreatePacket(BasicMessage.SERVER, command);
 			nioserverhandler.pushWriteSegement(sk, p);
 		}
-		nioserverhandler.pushWriteSegement(admin, new packet(
+		nioserverhandler.pushWriteSegement(admin, PacketProtocolImpl.CreatePacket(
 				BasicMessage.SERVER, BasicMessage.OK));
 	}
 
@@ -112,7 +114,7 @@ public class AdminManager extends SlaveManager {
 		case BasicMessage.OP_EXEC:
 		case ServiceMessage.SERVICE:
 		case ServiceMessage.THREAD:
-			p = new packet(BasicMessage.SERVER, command, args);
+			p = PacketProtocolImpl.CreatePacket(BasicMessage.SERVER, command, args.toStringUtf8());
 			ml.log("handle admin's exec|service|thread request");
 			keymanager.handleAllNodes(nioserverhandler, p);
 			break;
@@ -120,9 +122,9 @@ public class AdminManager extends SlaveManager {
 		case BasicMessage.OP_MESSAGE:
 		case BasicMessage.OP_SYSINFO:
 			ml.log("handle admin's close|message|sysinfo request");
-			p = new packet(BasicMessage.SERVER, command, args);
+			p = PacketProtocolImpl.CreatePacket(BasicMessage.SERVER, command, args.toStringUtf8());
 			keymanager.handleAllNodes(nioserverhandler, p);
-			packet reply = new packet(BasicMessage.SERVER, BasicMessage.OK);
+			packet reply = PacketProtocolImpl.CreatePacket(BasicMessage.SERVER, BasicMessage.OK);
 			nioserverhandler.pushWriteSegement(admin, reply);
 			break;
 

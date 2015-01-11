@@ -3,7 +3,9 @@ package com.intel.fangpei.process;
 import org.apache.commons.lang.ArrayUtils;
 
 import com.intel.fangpei.BasicMessage.BasicMessage;
-import com.intel.fangpei.BasicMessage.packet;
+//import com.intel.fangpei.BasicMessage.packet;
+import com.clusterwork.protocol.PacketProtos.packet;
+import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
 import com.intel.fangpei.logfactory.MonitorLog;
 import com.intel.fangpei.network.NIONodeHandler;
 import com.intel.fangpei.task.ExtendTask;
@@ -29,7 +31,7 @@ public class ServiceDemo {
 	    demon.setDaemon(true);
 	    demon.start();
 	    String jvmId = args[2];
-		packet one = new packet(BasicMessage.NODE, BasicMessage.OP_LOGIN,jvmId.getBytes());
+		packet one = PacketProtocolImpl.CreatePacket(BasicMessage.NODE, BasicMessage.OP_LOGIN,jvmId);
 		node.addSendPacket(one);
 	    Runtime.getRuntime().addShutdownHook(new Thread() {
 	      public void run() {
@@ -67,12 +69,8 @@ public class ServiceDemo {
 	          Thread.sleep(millis);
 	          continue;
 	        } else {
-	        	ml.log("Service Demo Receive:"+inprocessTaskPacket.getBuffer());
-	        	byte[] taskArgsbytes = inprocessTaskPacket.getArgs();
-	        	if(taskArgsbytes == null){
-	        		ml.error("Service Demo Receive:fack!!! no data-----------");
-	        	}
-	        	String taskArgsString = new String(taskArgsbytes);
+	        	ml.log("Service Demo Receive:"+inprocessTaskPacket);
+	        	String taskArgsString = inprocessTaskPacket.getArgs().toStringUtf8();
 	        	String[] taskArgs = taskArgsString.trim().split(" ");
 	        	ml.log("Service Demo Receive:receive a new task!");
 	        	String taskname = taskArgs[0];

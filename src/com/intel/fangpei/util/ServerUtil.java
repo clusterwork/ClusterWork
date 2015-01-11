@@ -11,7 +11,9 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 
 import com.intel.fangpei.BasicMessage.BasicMessage;
-import com.intel.fangpei.BasicMessage.packet;
+//import com.intel.fangpei.BasicMessage.packet;
+import com.clusterwork.protocol.PacketProtos.packet;
+import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
 import com.intel.fangpei.logfactory.MonitorLog;
 import com.intel.fangpei.network.NIOProcess;
 import com.intel.fangpei.network.NIOServerHandler;
@@ -96,35 +98,35 @@ public static NIOServerHandler startServerHandler(String port,MonitorLog ml){
 	}
 
 	public static int SendToClient(SocketChannel sc, packet p) {
-		return SendToClientWithTimeout(sc, p.getBuffer());
+		return SendToClientWithTimeout(sc, ByteBuffer.wrap(p.toByteArray()));
 	}
 
-	public static int SendToClient(SocketChannel sc, byte command, byte[] args) {
-		packet one = new packet(BasicMessage.SERVER, command, args);
-		return SendToClientWithTimeout(sc, one.getBuffer());
+	public static int SendToClient(SocketChannel sc, int command, byte[] args) {
+		packet one = PacketProtocolImpl.CreatePacket(BasicMessage.SERVER, command, new String(args));
+		return SendToClientWithTimeout(sc, ByteBuffer.wrap(one.toByteArray()));
 
 	}
 
-	public static int SendToClient(SocketChannel sc, byte command) {
-		packet one = new packet(BasicMessage.SERVER, command);
-		return SendToClientWithTimeout(sc, one.getBuffer());
+	public static int SendToClient(SocketChannel sc, int command) {
+		packet one = PacketProtocolImpl.CreatePacket(BasicMessage.SERVER, command);
+		return SendToClientWithTimeout(sc, ByteBuffer.wrap(one.toByteArray()));
 	}
-	public static void attach(SelectionKey  key , packet attach){
-		if(key.attachment() == null){
-			key.attach(attach.getBuffer());
-		}else{
-			/*
-			 * maybe the attachment is mutil-packets;
-			 * a bug is here!the attachments maybe lose if 
-			 * another atatchement is coming but this one have
-			 * noe been processed.
-			 */
-			ByteBuffer front = (ByteBuffer) key.attachment();
-			ByteBuffer now = attach.getBuffer();
-			ByteBuffer buffer = ByteBuffer.allocate(front.capacity()+now.capacity());
-			buffer.put((ByteBuffer) front.flip());
-			buffer.put((ByteBuffer) now.flip());
-			key.attach(buffer);
-		}
-	}
+//	public static void attach(SelectionKey  key , packet attach){
+//		if(key.attachment() == null){
+//			key.attach(attach.getBuffer());
+//		}else{
+//			/*
+//			 * maybe the attachment is mutil-packets;
+//			 * a bug is here!the attachments maybe lose if 
+//			 * another atatchement is coming but this one have
+//			 * noe been processed.
+//			 */
+//			ByteBuffer front = (ByteBuffer) key.attachment();
+//			ByteBuffer now = attach.getBuffer();
+//			ByteBuffer buffer = ByteBuffer.allocate(front.capacity()+now.capacity());
+//			buffer.put((ByteBuffer) front.flip());
+//			buffer.put((ByteBuffer) now.flip());
+//			key.attach(buffer);
+//		}
+//	}
 }

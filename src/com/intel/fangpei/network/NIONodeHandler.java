@@ -1,12 +1,9 @@
 package com.intel.fangpei.network;
 
 import java.io.IOException;
-import java.nio.channels.SelectionKey;
 import java.util.LinkedList;
 
-import com.intel.fangpei.BasicMessage.BasicMessage;
-import com.intel.fangpei.BasicMessage.packet;
-import com.intel.fangpei.network.PacketLine.segment;
+import com.clusterwork.protocol.PacketProtos.packet;
 /**
  * <h2>help class</h2>
  * <p>help Node to send and receive data with server</p>

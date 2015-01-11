@@ -3,7 +3,9 @@ package com.intel.fangpei.network;
 
 import com.intel.fangpei.BasicMessage.BasicMessage;
 import com.intel.fangpei.BasicMessage.HeartBeatMessage;
-import com.intel.fangpei.BasicMessage.packet;
+//import com.intel.fangpei.BasicMessage.packet;
+import com.clusterwork.protocol.PacketProtos.packet;
+import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
 import com.intel.fangpei.util.ConfManager;
 
 public class HeartBeatThread implements Runnable{
@@ -26,7 +28,7 @@ public class HeartBeatThread implements Runnable{
 		
 		try {
 			while(true){
-			packet heart_beat = new packet(BasicMessage.NODE, HeartBeatMessage.HEART_BEAT,hostname);
+			packet heart_beat = PacketProtocolImpl.CreatePacket(BasicMessage.NODE, HeartBeatMessage.HEART_BEAT,hostname);
 			connect.addSendPacket(heart_beat);
 			Thread.sleep(HEART_BEAT_INTERVAL*1000);
 			//packet heart_beat_check = new packet(BasicMessage.ADMIN, HeartBeatMessage.HEART_BEAT_CHECK);

@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
-import com.intel.fangpei.BasicMessage.packet;
+//import com.intel.fangpei.BasicMessage.packet;
+import com.clusterwork.protocol.PacketProtos.packet;
 
 public interface IConnection {
 	public void addSendPacket(packet out);
@@ -23,7 +24,7 @@ public interface IConnection {
 
 	public boolean isEmpty();
 
-	public int receive() throws IOException;
+	public packet receive() throws IOException;
 
 	public void send(ByteBuffer buffer);
 

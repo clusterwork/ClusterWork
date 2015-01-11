@@ -5,7 +5,9 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 
 import com.intel.fangpei.BasicMessage.HeartBeatMessage;
-import com.intel.fangpei.BasicMessage.packet;
+//import com.intel.fangpei.BasicMessage.packet;
+import com.clusterwork.protocol.PacketProtos.packet;
+import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
 import com.intel.fangpei.logfactory.MonitorLog;
 import com.intel.fangpei.network.PacketLine.segment;
 import com.intel.fangpei.terminalmanager.AdminManager;
@@ -82,26 +84,4 @@ public class NIOProcess implements Runnable {
 
 	}
 	
-//	private synchronized void checkAdmin(){
-//		if(lastactive==-1){
-//			if(isExsist_Admin){
-//				isExsist_Admin=false;
-//				System.out.println("there is no admin node!");
-//			}
-//		}else{
-//			if(System.currentTimeMillis()-lastactive>HeartBeatThread.HEART_BEAT_OUT_TIME*1000){
-//				lastactive=-1;
-//				System.out.println("Admin is offline!");
-//			}
-//		}
-//	
-//	}
-//	private synchronized void registeAdminActvie(){
-//		lastactive = System.currentTimeMillis();
-//		if(!isExsist_Admin){
-//			isExsist_Admin = true;
-//			System.out.println("Admin is online!");
-//		}
-//	}
-
 }

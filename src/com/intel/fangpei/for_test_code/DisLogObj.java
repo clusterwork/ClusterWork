@@ -9,7 +9,9 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 
 import com.intel.fangpei.BasicMessage.BasicMessage;
-import com.intel.fangpei.BasicMessage.packet;
+//import com.intel.fangpei.BasicMessage.packet;
+import com.clusterwork.protocol.PacketProtos.packet;
+import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
 import com.intel.fangpei.network.NIONodeHandler;
 import com.intel.fangpei.network.NIOServerHandler;
 import com.intel.fangpei.network.PacketLine.segment;
@@ -80,19 +82,19 @@ public void send(packet p,int level){
 	if(!isServer){
 		switch(level){
 		case 1:	
-			b = ArrayUtils.addAll((DateFormat.format(date)+"["+ip+"]["+className+"][info]").getBytes(),p.getArgs());
+			b = ArrayUtils.addAll((DateFormat.format(date)+"["+ip+"]["+className+"][info]").getBytes(),p.getArgs().toByteArray());
 		break;
 		case 2:
-			b = ArrayUtils.addAll((DateFormat.format(date)+"["+ip+"]["+className+"][debug]").getBytes(),p.getArgs());
+			b = ArrayUtils.addAll((DateFormat.format(date)+"["+ip+"]["+className+"][debug]").getBytes(),p.getArgs().toByteArray());
 			break;
 		case 3:
-			b = ArrayUtils.addAll((DateFormat.format(date)+"["+ip+"]["+className+"][warn]").getBytes(),p.getArgs());
+			b = ArrayUtils.addAll((DateFormat.format(date)+"["+ip+"]["+className+"][warn]").getBytes(),p.getArgs().toByteArray());
 			break;
 		case 4:
-			b = ArrayUtils.addAll((DateFormat.format(date)+"["+ip+"]["+className+"][error]").getBytes(),p.getArgs());
+			b = ArrayUtils.addAll((DateFormat.format(date)+"["+ip+"]["+className+"][error]").getBytes(),p.getArgs().toByteArray());
 			break;
 		case 5:
-			b = ArrayUtils.addAll((DateFormat.format(date)+"["+ip+"]["+className+"][fatal]").getBytes(),p.getArgs());
+			b = ArrayUtils.addAll((DateFormat.format(date)+"["+ip+"]["+className+"][fatal]").getBytes(),p.getArgs().toByteArray());
 			break;
 		}
 	}
@@ -100,7 +102,7 @@ public void send(packet p,int level){
 		LOG.info(new String(b));
 	}
 	if(level > reportLevel){
-		client.addSendPacket(new packet(BasicMessage.NODE,BasicMessage.OP_MESSAGE,b));		
+		client.addSendPacket(PacketProtocolImpl.CreatePacket(BasicMessage.NODE,BasicMessage.OP_MESSAGE,new String(b)));		
 		}
 	}
 public packet receive(){

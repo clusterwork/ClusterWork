@@ -14,9 +14,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import com.intel.fangpei.BasicMessage.BasicMessage;
-import com.intel.fangpei.BasicMessage.packet;
+//import com.intel.fangpei.BasicMessage.packet;
+import com.clusterwork.protocol.PacketProtos.packet;
+import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
 import com.intel.fangpei.logfactory.MonitorLog;
 import com.intel.fangpei.network.PacketLine.segment;
+import com.intel.fangpei.terminal.Admin;
 import com.intel.fangpei.util.ConfManager;
 import com.intel.fangpei.util.Line;
 import com.intel.fangpei.util.ServerUtil;
@@ -34,8 +37,8 @@ public class NIOServerHandler implements INIOHandler,Runnable{
 	private SelectionKey inprocesskey = null;
 	private ByteBuffer buffer = null;
 	private int version = 0;
-	private byte clientType = 0;
-	private byte command = 0;
+	private int clientType = 0;
+	private int command = 0;
 	private int argsize = 0;
 	private byte[] args = null;
 	private packet p = null;
@@ -52,7 +55,7 @@ public class NIOServerHandler implements INIOHandler,Runnable{
 		}else{
 			try {
 				ml = new MonitorLog();
-				System.out.println("ml is"+(ml == null));
+				System.out.println("init ml:"+ml);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -76,8 +79,9 @@ public class NIOServerHandler implements INIOHandler,Runnable{
 	public void processRead() throws IOException {
 			//System.out.println("[NIOServerHandler]read a packet");
 			SocketChannel channel = (SocketChannel) inprocesskey.channel();
+			packet p = null;
 			try{
-			if(receive(channel) <= 0){
+			if((p = receive(channel)) == null){
 				System.out.println("read node from "
 						+ channel.socket().getInetAddress().getHostAddress()
 						+ " fail,cancel this key!");
@@ -91,11 +95,6 @@ public class NIOServerHandler implements INIOHandler,Runnable{
 				manager.addCancelInterest(inprocesskey);
 				return;
 			}
-			//System.out.println("received a packet from"+channel.socket().getInetAddress().getHostName());
-			if(argsize > 0)
-				p = new packet(clientType, command, args);
-			else
-				p = new packet(clientType, command);
 				//add until true
 				while(!pipeline.addNode(inprocesskey, p)){
 					try {
@@ -105,9 +104,6 @@ public class NIOServerHandler implements INIOHandler,Runnable{
 						e.printStackTrace();
 					}
 				}
-				//System.out.println("add a node to pipeline");
-				//manager.addNeedProcessKey(inprocesskey);
-				//manager.addReadInterest(inprocesskey);
 				argsize = 0; 
 		}
 
@@ -115,30 +111,42 @@ public class NIOServerHandler implements INIOHandler,Runnable{
 
 	@Override
 	public void processWrite() throws IOException {
-		//System.out.println("[NIOServerHandler]processwrite");
 		while (waitWritePipeLine.hasNext()) {
 			segment se = waitWritePipeLine.popNode();
 			if (se != null) {
 				SelectionKey sk = se.key;
 				packet p = se.p;
 				SocketChannel channel = (SocketChannel) sk.channel();
-				ByteBuffer buffer = p.getBuffer();
-				if (buffer != null) {
-					if (channel.write((ByteBuffer) buffer.flip()) < buffer
-							.capacity()) {
-						ml.warn("server send little bytes than expected!");
-					}
-					System.out
-							.println("[NIOServerHandler]write a segment to client:"
-									+ SystemUtil.byteToString(p.getArgs()));
-				}
-				//manager.addReadInterest(inprocesskey);
+				int msgLen = p.getSerializedSize();
+				ByteBuffer buffer = ByteBuffer.allocate(Integer.SIZE+msgLen);
+				buffer.putInt(msgLen);
+				buffer.put(p.toByteArray());
+				buffer.flip();
+				send(channel,buffer);
+//				if (buffer != null) {
+//					int len = channel.write((ByteBuffer) buffer);
+//					System.out
+//							.println("[NIOServerHandler]write out packet:"
+//									+ p+",bytes:"+len);
+//				}
 			}
 
 		}
 	}
 
-	//}
+	public void send(SocketChannel channel,ByteBuffer buffer) {
+		while (buffer.hasRemaining()) {
+			try {
+				int len = channel.write(buffer);
+				if(Admin.debug)
+				ml.log("[NIOHandler]send a packet:"+buffer+",len:"+len);
+			} catch (IOException e) {
+				ml.error("send data to server failed:"+e.getMessage());
+				buffer.clear();
+				break;
+			}
+		}
+	}
 
 	@Override
 	public void processError(Exception e) {
@@ -152,51 +160,25 @@ public class NIOServerHandler implements INIOHandler,Runnable{
 	public void removeWriteKey(SelectionKey key){
 		waitWritePipeLine.removeNode(key);
 	}
-	private int receive(SocketChannel channel) throws IOException {
+	private packet receive(SocketChannel channel) throws IOException {
 		buffer.clear();
-		buffer.limit(10);
+		buffer.limit(Integer.SIZE);
 		channel.read(buffer);
-		if(buffer.position() != buffer.limit()){
-			buffer.clear();
-			return 0;
+		if(buffer.position() == 0){
+			System.out.println("no data received");
+			return null;
 		}
 		buffer.flip();
-		version = buffer.getInt();
-		if (version != BasicMessage.VERSION) {
-			ml.warn("the remote host's version is not compatible with us ,"
-					+ " maybe this will make no sense!");
-		}
-		argsize = buffer.getInt();
-		clientType = buffer.get();
-		command = buffer.get();
-		//over the packet size;
-		if(argsize > buffer.capacity() - 10){
-			ml.error("packet args size is over the packet size limit" +
-					",and the limit" +
-					"is "+(buffer.capacity()-10)+"," +
-							"but the packet has "+argsize);
-			return -1;
-		}
+		int msgLen = buffer.getInt();
+		System.out.println("[NIOServerHandler]packet len:"+msgLen);
 		buffer.clear();
-		if(argsize == 0){
-			return 10;
-		}else{
-			buffer.limit(argsize);
-			tc.timeRefresh();
-			while(buffer.remaining() > 0 ){
-				if(tc.isTimeout()){
-					ml.error("have one  packet read error...please check the link?");
-					buffer.clear();
-					return 0;
-				}
-				channel.read(buffer);
-			}
-			buffer.flip();
-			args = new byte[argsize];
-			buffer.get(args, 0, argsize);
-			buffer.clear();
+		buffer.limit(msgLen);
+		while(buffer.hasRemaining()){
+			channel.read(buffer);
 		}
-		return argsize + 10;
+		System.out.println("[NIOServerHandler][receive]get buffer:"+buffer);
+		packet p = PacketProtocolImpl.CreatePacket(buffer);
+		return p;
 	}
 	public void init(){
 		//System.out.println("start NIOServerHandler");
@@ -265,7 +247,6 @@ public class NIOServerHandler implements INIOHandler,Runnable{
 					System.out.println("[NIOServerHandler]accept a connection");
 					try {
 						channel = serverchannel.accept();
-						System.out.println("ml is"+(ml == null));
 						ml.log("accept a new connection from "
 								+ channel.socket().getInetAddress()
 										.getHostAddress());
@@ -291,7 +272,7 @@ public class NIOServerHandler implements INIOHandler,Runnable{
 	}
 	private void execute(SelectionKey key) {
 		if(key.isReadable()){
-			System.out.println("[NIOServerhandler]isreadable!!!!!");
+//			System.out.println("[NIOServerhandler]isreadable!!!!!");
 			inprocesskey = key;
 			try {
 				processRead();

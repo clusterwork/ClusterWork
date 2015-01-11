@@ -3,7 +3,9 @@ package com.intel.fangpei.for_test_code;
 import java.nio.ByteBuffer;
 
 import com.intel.fangpei.BasicMessage.BasicMessage;
-import com.intel.fangpei.BasicMessage.packet;
+//import com.intel.fangpei.BasicMessage.packet;
+import com.clusterwork.protocol.PacketProtos.packet;
+import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
 import com.intel.fangpei.network.NIONodeHandler;
 import com.intel.fangpei.network.NIOServerHandler;
 import com.intel.fangpei.network.PacketLine.segment;
@@ -27,12 +29,12 @@ public class test {
 		}
 		//System.out.println(new String(o1.receive().getArgs()));
 		//System.out.println(new String(o1.receive().getArgs()));
-		System.out.println(new String(o2.receive().getArgs()));
-		System.out.println(new String(o2.receive().getArgs()));
+		System.out.println(o2.receive());
+		System.out.println(o2.receive());
 		NIOServerHandler server2 = ServerUtil.startServerHandler("457",null);
 		NIONodeHandler node2 = ClientUtil.startNodeThread("127.0.0.1", 457);
-		node2.addSendPacket(new packet(BasicMessage.NODE,BasicMessage.OP_MESSAGE,"hello world!"));
-		node2.addSendPacket(new packet(BasicMessage.NODE,BasicMessage.OP_MESSAGE,"hello world2!"));
+		node2.addSendPacket(PacketProtocolImpl.CreatePacket(BasicMessage.NODE,BasicMessage.OP_MESSAGE,"hello world!"));
+		node2.addSendPacket(PacketProtocolImpl.CreatePacket(BasicMessage.NODE,BasicMessage.OP_MESSAGE,"hello world2!"));
 		try {
 			Thread.sleep(2000);
 		} catch (InterruptedException e) {
@@ -42,7 +44,7 @@ public class test {
 		ClientUtil.print(System.getenv());
 		segment s = server2.getNewSegement();
 		
-		System.out.println("received:"+new String(s.p.getArgs()));
+		System.out.println("received:"+s.p);
 		try {
 			Thread.sleep(2000);
 		} catch (InterruptedException e) {
@@ -50,7 +52,7 @@ public class test {
 			e.printStackTrace();
 		}
 		segment s2 = server2.getNewSegement();
-		System.out.println("received:"+new String(s2.p.getArgs()));
+		System.out.println("received:"+s2.p);
 		ByteBuffer bb = ByteBuffer.allocate(1024);
 		bb.putInt(123);
 		System.out.println(bb.mark() + " " + bb.limit() + " " + bb.remaining());

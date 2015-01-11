@@ -9,7 +9,9 @@ import java.util.Random;
 import java.util.Set;
 
 import com.intel.fangpei.BasicMessage.BasicMessage;
-import com.intel.fangpei.BasicMessage.packet;
+//import com.intel.fangpei.BasicMessage.packet;
+import com.clusterwork.protocol.PacketProtos.packet;
+import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
 import com.intel.fangpei.network.rpc.RpcClient;
 import com.intel.fangpei.process.ChildStrategy;
 import com.intel.fangpei.process.MyChildStrategy2;
@@ -149,8 +151,8 @@ public class TaskRunner implements Runnable {
 					sb.append(" ");
 				}
 			}
-			return new packet(BasicMessage.NODE, BasicMessage.OP_MESSAGE, sb
-					.toString().getBytes());
+			return PacketProtocolImpl.CreatePacket(BasicMessage.NODE, BasicMessage.OP_MESSAGE, sb
+					.toString());
 		}
 	}
 
@@ -311,7 +313,7 @@ public class TaskRunner implements Runnable {
 		int len = ids.length;
 		for (int i = 0; i < len; i++) {
 			ChildWork childwork = idToChildWork.get(ids[i]);
-			boss.send(childwork.jvmId, new packet(BasicMessage.SERVER,
+			boss.send(childwork.jvmId, PacketProtocolImpl.CreatePacket(BasicMessage.SERVER,
 					BasicMessage.TASKINFO, taskid + " " + childwork.jvmId));
 		}
 	}

@@ -15,7 +15,9 @@ import com.ali.fangpei.service.wrapWork;
 import com.intel.fangpei.BasicMessage.BasicMessage;
 import com.intel.fangpei.BasicMessage.HeartBeatMessage;
 import com.intel.fangpei.BasicMessage.ServiceMessage;
-import com.intel.fangpei.BasicMessage.packet;
+//import com.intel.fangpei.BasicMessage.packet;
+import com.clusterwork.protocol.PacketProtos.packet;
+import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
 import com.intel.fangpei.SystemInfoCollector.SysInfo;
 import com.intel.fangpei.logfactory.MonitorLog;
 import com.intel.fangpei.network.HeartBeatThread;
@@ -101,7 +103,7 @@ public class Node extends Client {
 		for (int i = 0; i < 1; i++) {
 			Node c = new Node(ip, port);
 			new Thread(c).start();
-			packet one = new packet(BasicMessage.NODE, BasicMessage.OP_LOGIN);
+			packet one = PacketProtocolImpl.CreatePacket(BasicMessage.NODE, BasicMessage.OP_LOGIN);
 			c.connect.addSendPacket(one);
 		}
 	}
@@ -113,16 +115,16 @@ public class Node extends Client {
 			return false;
 		}
 		if (message.getArgs() != null) {
-			args = new String(message.getArgs()).split(" ");
+			args = message.getArgs().toStringUtf8().split(" ");
 		}
 		/*
 		 * we need to unpack the received packet and check the command !
 		 */
-		byte opt = message.getCommand();
+		int opt = message.getCommand();
 		switch (opt) {
 		case BasicMessage.OP_CLOSE:
 			ml.log("messge from server ,[close] the node");
-			packet one = new packet(BasicMessage.NODE, BasicMessage.OP_QUIT);
+			packet one = PacketProtocolImpl.CreatePacket(BasicMessage.NODE, BasicMessage.OP_QUIT);
 			connect.addSendPacket(one);
 			try {
 				Thread.sleep(3000);
@@ -151,7 +153,7 @@ public class Node extends Client {
 		case ServiceMessage.SERVICE:
 			ml.log("Thread|Service Request with args:"
 					+ (args == null ? "no args!"
-							: new String(message.getArgs())));
+							: message.getArgs()));
 			extendThreadWork("java", null);
 			return true;
 			/*
@@ -176,8 +178,8 @@ public class Node extends Client {
 				ml.log(e.getMessage());
 				return false;
 			}
-			packet p = new packet(BasicMessage.NODE, BasicMessage.OP_SYSINFO,
-					si.GetSysInfoBytes());
+			packet p = PacketProtocolImpl.CreatePacket(BasicMessage.NODE, BasicMessage.OP_SYSINFO,
+					new String(si.GetSysInfoBytes()));
 			connect.addSendPacket(p);
 			return true;
 		case BasicMessage.OP_SH:

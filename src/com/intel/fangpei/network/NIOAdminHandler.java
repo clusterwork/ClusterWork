@@ -6,7 +6,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import com.intel.fangpei.BasicMessage.BasicMessage;
-import com.intel.fangpei.BasicMessage.packet;
+//import com.intel.fangpei.BasicMessage.packet;
+import com.clusterwork.protocol.PacketProtos.packet;
+import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
 import com.intel.fangpei.SystemInfoCollector.SysInfo;
 import com.intel.fangpei.terminal.Admin;
 /**
@@ -31,7 +33,7 @@ public class NIOAdminHandler extends NIOHandler {
 		try {
 			ml.log("start to connect server...");
 			processConnect();
-			packet one = new packet(BasicMessage.ADMIN, BasicMessage.OP_LOGIN);
+			packet one = PacketProtocolImpl.CreatePacket(BasicMessage.ADMIN, BasicMessage.OP_LOGIN);
 			addSendPacket(one);
 			ml.log("connected!");
 		} catch (IOException e1) {
@@ -48,7 +50,7 @@ public class NIOAdminHandler extends NIOHandler {
 				if (!isEmpty()) {
 					p = getReceivePacket();
 					if(Admin.debug)
-					System.out.println("process a packet:"+p.getBuffer());
+					System.out.println("process a packet:"+p.toString());
 					processAdminreceived(p);
 				} else {
 					Thread.sleep(100);
@@ -71,15 +73,14 @@ public class NIOAdminHandler extends NIOHandler {
 	}
 
 	private void processAdminreceived(packet p) {
-		ByteBuffer bb = p.getBuffer();
+		ByteBuffer bb = ByteBuffer.wrap(p.toByteArray());
 		bb.flip();
-		int version = bb.getInt();
-		int argsize = bb.getInt();
-		byte clientType = bb.get();
-		byte command = bb.get();
+		int version = p.getVersion();
+		int argsize = p.getArgsize();
+		int clientType = p.getClientType();
+		int command = p.getCommand();
+		byte[] args = p.getArgs().toByteArray();
 		if(command == BasicMessage.OP_SYSINFO){
-			byte[] args = new byte[bb.remaining()];
-			bb.get(args);
 			System.out.println();
 			System.out.println("system info get(in summary):");
 			HashMap hm = SysInfo.deserialize(args);
@@ -87,8 +88,6 @@ public class NIOAdminHandler extends NIOHandler {
 			System.out.println("NetWork_IP:"+hm.get("NetWork_IP"));
 		}
 		if(command == BasicMessage.OP_MESSAGE){
-			byte[] args = new byte[bb.remaining()];
-			bb.get(args);
 			System.out.println(new String(args));
 		}
 	}

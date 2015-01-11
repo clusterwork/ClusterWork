@@ -10,7 +10,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 
-import com.intel.fangpei.BasicMessage.packet;
+//import com.intel.fangpei.BasicMessage.packet;
+import com.clusterwork.protocol.PacketProtos.packet;
 import com.intel.fangpei.logfactory.MonitorLog;
 import com.intel.fangpei.network.rpc.RpcClient;
 import com.intel.fangpei.util.ConfManager;

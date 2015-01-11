@@ -10,7 +10,9 @@ import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 
 import com.intel.fangpei.BasicMessage.BasicMessage;
-import com.intel.fangpei.BasicMessage.packet;
+//import com.intel.fangpei.BasicMessage.packet;
+import com.clusterwork.protocol.PacketProtos.packet;
+import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
 import com.intel.fangpei.logfactory.MonitorLog;
 import com.intel.fangpei.terminal.Admin;
 import com.intel.fangpei.util.TimeCounter;
@@ -27,7 +29,7 @@ public class NIOHandler implements IConnection, INIOHandler, Runnable {
 	private LinkedList<packet> receivequeue = new LinkedList<packet>();
 	private int version = 0, argsize = 0;
 	byte[] args = null;
-	private byte clientType = (byte) 0, command = (byte) 0;
+	private int clientType = 0, command = 0;
 	public NIOHandler(String ip, int port) {
 		this.serverip = ip;
 		this.port = port;
@@ -68,24 +70,16 @@ public class NIOHandler implements IConnection, INIOHandler, Runnable {
 	}
 	@Override
 	public synchronized void processRead() throws IOException {
-		if(receive() == 0){
+		packet p = receive();
+		if(p == null){
 			return;
 		}
-		//if(Admin.debug)
-		ml.log("[processread]read a packet!"+new String(args));
-		packet p = null;
-		/*
-		 * read a packet once; buffer.putInt(version); buffer.putInt(argsize);
-		 * buffer.put(clientType); buffer.put(command);
-		 */if(argsize > 0)
-			p = new packet(clientType, command, args);
-		 else
-			p = new packet(clientType, command);
+		if(Admin.debug)
+		System.out.println("[NIOHandler]read a packet:"+p);
 		 synchronized(receivequeue){
 			receivequeue.addLast(p);
 			receivequeue.notifyAll();
 		 }
-			argsize = 0; 
 	}
 
 	@Override
@@ -93,7 +87,17 @@ public class NIOHandler implements IConnection, INIOHandler, Runnable {
 		if (sendqueue.isEmpty())
 			return;
 		packet p = sendqueue.pop();
-		ByteBuffer buffer = p.getBuffer();
+		byte[] tmpArray = p.toByteArray();
+		int msgLen = tmpArray.length;
+		buffer.clear();
+		buffer.limit(Integer.SIZE+msgLen);
+		System.out.println("buffer is:"+buffer+",limit:"+(Integer.SIZE+msgLen));
+		buffer.putInt(msgLen);
+		System.out.println("buffer is:"+buffer);
+		buffer.put(tmpArray,0,msgLen);
+		System.out.println("buffer is:"+buffer);
+		buffer.flip();
+		System.out.println("buffer is:"+buffer);
 		send(buffer);
 		//System.out.println("[NIOHandler]processwrite:");
 	}
@@ -158,80 +162,36 @@ public class NIOHandler implements IConnection, INIOHandler, Runnable {
 	}
 
 	@Override
-	public int receive() throws IOException {
-		if(buffer.remaining() < 10){
-				buffer.compact();
-				channel.read(buffer);
-				buffer.flip();
-				if(buffer.remaining() < 10){
-					return 0;
-				}
+	public packet receive() throws IOException {
+		buffer.clear();
+		buffer.limit(Integer.SIZE);
+		channel.read(buffer);
+		if(buffer.position() == 0){
+			System.out.println("no data received");
+			return null;
 		}
-		/*
-		 * bug here;
-		 * when i close the server first, the admin will in error;
-		 */
-		//System.out.print(buffer);
-		version = buffer.getInt();
-		argsize = buffer.getInt();
-		clientType = buffer.get();
-		command = buffer.get();
-		//System.out.println(argsize+"..."+version);
-		if (version != BasicMessage.VERSION) {
-			ml.warn("the remote host's version is not compatible with us ,"+version
-					+ ", maybe this will make no sense!");
+		buffer.flip();
+		int msgLen = buffer.getInt();
+		System.out.println("[NIOHandler]packet len:"+msgLen);
+		buffer.clear();
+		buffer.limit(msgLen);
+		while(buffer.hasRemaining()){
+			channel.read(buffer);
 		}
-		if(argsize == 0){
-			return 10;
-		}
-		if(buffer.remaining() < argsize ){
-			int toread = argsize - buffer.remaining();
-			if((buffer.remaining() > 0)){
-				buffer.compact();
-			}else{
-				buffer.clear();
-			}
-			tc.timeRefresh();
-			while(toread > 0 ){
-				if(tc.isTimeout()){
-					ml.error("have one  packet  error...throw it");
-					//clear buffer for next new packet;
-					buffer.clear();
-					buffer.flip();
-					return 0;
-				}
-				toread -= channel.read(buffer);
-			}
-			buffer.flip();
-			try {
-				if (argsize > 0) {
-					if(buffer.remaining() < argsize ){
-						ml.error("uncomplete packet received");
-						buffer.clear();
-						buffer.flip();
-						return 0;
-					}
-				}
-			} catch (BufferUnderflowException e) {
-				ml.error(e.getMessage());
-			}
-		}
-		args = new byte[argsize];
-		buffer.get(args, 0, argsize);
-		return argsize + 10;
+		System.out.println("[NIOHandler][receive]get buffer:"+buffer);
+		packet p = PacketProtocolImpl.CreatePacket(buffer);
+		return p;
 	}
 
 	@Override
 	public void send(ByteBuffer buffer) {
-		if(Admin.debug)
-		System.out.println("send a packet:"+buffer.toString());
-		buffer.flip();
 		while (buffer.hasRemaining()) {
 			try {
-				channel.write(buffer);
+				int len = channel.write(buffer);
+				if(Admin.debug)
+				ml.log("[NIOHandler]send a packet:"+buffer+",len:"+len);
 			} catch (IOException e) {
 				ml.error("send data to server failed:"+e.getMessage());
-				buffer.clear();
 				break;
 			}
 		}

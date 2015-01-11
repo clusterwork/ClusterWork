@@ -2,7 +2,9 @@ package com.ali.fangpei.service;
 
 import com.intel.fangpei.BasicMessage.BasicMessage;
 import com.intel.fangpei.BasicMessage.ServiceMessage;
-import com.intel.fangpei.BasicMessage.packet;
+//import com.intel.fangpei.BasicMessage.packet;
+import com.clusterwork.protocol.PacketProtos.packet;
+import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
 import com.intel.fangpei.task.TaskRunner.TaskEnv;
 
 public class wrapWork {
@@ -38,6 +40,6 @@ public packet toTransfer() {
 	sb.append(" ");
 	}
 	}
-	return new packet(BasicMessage.NODE,command,sb.toString().getBytes());
+	return PacketProtocolImpl.CreatePacket(BasicMessage.NODE,command,sb.toString());
 }
 }

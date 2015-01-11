@@ -1,19 +1,16 @@
 package com.intel.fangpei.process;
 
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
-import org.apache.commons.lang.ArrayUtils;
-
 import com.intel.fangpei.BasicMessage.BasicMessage;
-import com.intel.fangpei.BasicMessage.packet;
+//import com.intel.fangpei.BasicMessage.packet;
+import com.clusterwork.protocol.PacketProtos.packet;
+import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
 import com.intel.fangpei.logfactory.MonitorLog;
 import com.intel.fangpei.network.NIONodeHandler;
 import com.intel.fangpei.network.rpc.RpcClient;
-import com.intel.fangpei.task.ExtendTask;
 import com.intel.fangpei.task.TaskRunner;
 import com.intel.fangpei.task.TaskRunner.SplitId;
 import com.intel.fangpei.util.ConfManager;
@@ -41,15 +38,16 @@ public class Child {
 		demon.start();
 		jvmId = args[2];
 		// send login packet
-		packet one = new packet(BasicMessage.NODE, BasicMessage.OP_LOGIN,
-				jvmId.getBytes());
+		packet one = PacketProtocolImpl.CreatePacket(BasicMessage.NODE, BasicMessage.OP_LOGIN,
+				jvmId+"");
 		node.addSendPacket(one);
 		// get head info here
 		packet head = null;
 		while ((head = node.getReceivePacket()) == null)
 			;
-		String[] heads = new String(head.getArgs()).split(" ");
-		System.out.println("args is : " + new String(head.getArgs()));
+		ml.log("child receive a packet : " + head);
+		String[] heads = head.getArgs().toStringUtf8().split(" ");
+		ml.log("child args is : " + head.getArgs().toStringUtf8());
 		taskid = heads[0];
 		jvmId = heads[1];
 		SplitExecutor executor = new SplitExecutor(Integer.parseInt(jvmId));
@@ -110,12 +108,8 @@ public class Child {
 				continue;
 			} else {
 				System.out.println("child " + jvmId + " recevied:"
-						+ new String(inprocessTaskPacket.getBuffer().array()));
-				byte[] taskArgsbytes = inprocessTaskPacket.getArgs();
-				if (taskArgsbytes == null) {
-					System.out.println("fack!!!-----------error");
-				}
-				String taskArgsString = new String(taskArgsbytes);
+						+ inprocessTaskPacket);
+				String taskArgsString = inprocessTaskPacket.getArgs().toStringUtf8();
 				String[] taskArgs = taskArgsString.trim().split(" ");
 				String taskname = taskArgs[0];
 				ml.log("receive a new task:" + taskname);
@@ -127,8 +121,8 @@ public class Child {
 					executor.flush();
 					// all complete,send exit request.
 					ml.log("all work of the JVM:" + jvmId + " have complete.");
-					one = new packet(BasicMessage.NODE, BasicMessage.OP_QUIT,
-							jvmId.getBytes());
+					one = PacketProtocolImpl.CreatePacket(BasicMessage.NODE, BasicMessage.OP_QUIT,
+							jvmId);
 					node.addSendPacket(one);
 					node.flush();
 					//Thread.sleep(1000);

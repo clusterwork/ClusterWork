@@ -8,7 +8,9 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 
 import com.intel.fangpei.BasicMessage.BasicMessage;
-import com.intel.fangpei.BasicMessage.packet;
+//import com.intel.fangpei.BasicMessage.packet;
+import com.clusterwork.protocol.PacketProtos.packet;
+import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
 import com.intel.fangpei.network.NIONodeHandler;
 import com.intel.fangpei.util.SystemUtil;
 import com.intel.fangpei.util.TimeCounter;
@@ -73,7 +75,7 @@ public class ProcOutPutHandler extends Thread{
 	} 
 	}
 	public void writeToServer(String cache){
-	p = new packet(BasicMessage.NODE,BasicMessage.OP_MESSAGE,SystemUtil.signature()+"\n"+cache);
+	p = PacketProtocolImpl.CreatePacket(BasicMessage.NODE,BasicMessage.OP_MESSAGE,SystemUtil.signature()+"\n"+cache);
 	NIONodeHandler.processRequest(p);
 }
 	public boolean MayNeedInput() {

@@ -1,7 +1,10 @@
 package com.intel.fangpei.terminalmanager;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
-import com.intel.fangpei.BasicMessage.packet;
+
+//import com.intel.fangpei.BasicMessage.packet;
+import com.clusterwork.protocol.PacketProtos.packet;
+import com.google.protobuf.ByteString;
 import com.intel.fangpei.logfactory.MonitorLog;
 import com.intel.fangpei.network.NIOServerHandler;
 import com.intel.fangpei.network.SelectionKeyManager;
@@ -10,12 +13,12 @@ public abstract class SlaveManager {
 	MonitorLog ml = null;
 	SelectionKey key = null;
 	SelectionKeyManager keymanager = null;
-	ByteBuffer buffer = null;
+	packet buffer = null;
 	int version = 0;
 	int argsize = 0;
-	byte clientType = 0;
-	byte command = 0;
-	byte[] args = null;
+	int clientType = 0;
+	int command = 0;
+	ByteString args = null;
 	NIOServerHandler nioserverhandler = null;
 	public SlaveManager(SelectionKeyManager keymanager,NIOServerHandler nioserverhandler) {
 		try {
@@ -31,18 +34,11 @@ public abstract class SlaveManager {
 	public abstract boolean Handle(SelectionKey key,packet p);
 
 	protected void unpacket() {
-		if(buffer == null){
-			return;
-		}
-		buffer.flip();
-		version = buffer.getInt();
-		argsize = buffer.getInt();
-		clientType = buffer.get();
-		command = buffer.get();
-		if (argsize != 0) {
-			args = new byte[buffer.remaining()];
-			buffer.get(args);
-		}
+		version = buffer.getVersion();
+		argsize = buffer.getArgsize();
+		clientType = buffer.getClientType();
+		command = buffer.getCommand();
+		args = buffer.getArgs();
 	}
 
 }

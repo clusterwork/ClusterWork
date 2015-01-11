@@ -8,7 +8,9 @@ import java.util.Map.Entry;
 
 import com.intel.fangpei.BasicMessage.BasicMessage;
 import com.intel.fangpei.BasicMessage.ServiceMessage;
-import com.intel.fangpei.BasicMessage.packet;
+//import com.intel.fangpei.BasicMessage.packet;
+import com.clusterwork.protocol.PacketProtos.packet;
+import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
 import com.intel.fangpei.network.HeartBeatThread;
 import com.intel.fangpei.network.NIOAdminHandler;
 import com.intel.fangpei.network.rpc.RpcClient;
@@ -20,7 +22,7 @@ import com.intel.fangpei.util.ConfManager;
  *
  */
 public class Admin extends Client {
-	public static boolean debug = false;
+	public static boolean debug = true;
 	/*
 	 * buffer to buffer the packet of command packet components: [Client Type]
 	 * byte [version] int [arg size] int [command] byte [args...] byte[]
@@ -80,33 +82,33 @@ public class Admin extends Client {
 		}
 		if (COMMAND == BasicMessage.OP_EXEC) {
 			try{
-			one = new packet(BasicMessage.ADMIN, COMMAND,
+			one = PacketProtocolImpl.CreatePacket(BasicMessage.ADMIN, COMMAND,
 					command.substring(command.indexOf(" "),
-							command.length()).getBytes());
+							command.length()));
 			}catch(IndexOutOfBoundsException e){
 				System.out.println("exec [classname]");
 				return "";
 			}
 		}
 		if(COMMAND == BasicMessage.OP_SYSINFO){
-		one = new packet(BasicMessage.ADMIN,COMMAND);
+		one = PacketProtocolImpl.CreatePacket(BasicMessage.ADMIN,COMMAND);
 		}
 		if (COMMAND == BasicMessage.OP_CLOSE) {
-		one = new packet(BasicMessage.ADMIN, COMMAND);
+		one = PacketProtocolImpl.CreatePacket(BasicMessage.ADMIN, COMMAND);
 		}
 		if (COMMAND == BasicMessage.OP_QUIT) {
-		one = new packet(BasicMessage.ADMIN, COMMAND);
+		one = PacketProtocolImpl.CreatePacket(BasicMessage.ADMIN, COMMAND);
 		}
 		if (COMMAND == BasicMessage.OP_SH) {
-			one = new packet(BasicMessage.ADMIN, COMMAND,
+			one = PacketProtocolImpl.CreatePacket(BasicMessage.ADMIN, COMMAND,
 					command.substring(command.indexOf(" "),
-							command.length()).getBytes());
+							command.length()));
 		}
 		if (COMMAND == ServiceMessage.THREAD||COMMAND == ServiceMessage.SERVICE) {
 			try{
-			one = new packet(BasicMessage.ADMIN, COMMAND,
+			one = PacketProtocolImpl.CreatePacket(BasicMessage.ADMIN, COMMAND,
 					command.substring(command.indexOf(" "),
-							command.length()).getBytes());
+							command.length()));
 			}catch(Exception e){
 				System.out.println("thread|service args");
 				return "";
