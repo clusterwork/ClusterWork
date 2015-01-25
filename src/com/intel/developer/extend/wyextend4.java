@@ -17,7 +17,7 @@ public class wyextend4 extends Extender {
 	public wyextend4(String s,String s2){
 		System.out.println(s+"~"+s2);
 	}
-	public void commitTask(){
+	public void commitSplit(){
 		 
 			Date nowTime = new Date(System.currentTimeMillis());
 			SimpleDateFormat sdFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");

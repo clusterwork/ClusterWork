@@ -1,13 +1,9 @@
 package com.intel.fangpei.terminal;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Random;
 
 import org.apache.commons.lang.ArrayUtils;
 
@@ -22,6 +18,7 @@ import com.intel.fangpei.SystemInfoCollector.SysInfo;
 import com.intel.fangpei.logfactory.MonitorLog;
 import com.intel.fangpei.network.HeartBeatThread;
 import com.intel.fangpei.network.NIONodeHandler;
+import com.intel.fangpei.network.rpc.RpcClient;
 import com.intel.fangpei.process.ChildStrategy;
 import com.intel.fangpei.process.MyChildStrategy;
 import com.intel.fangpei.process.ProcessFactory;
@@ -42,6 +39,7 @@ public class Node extends Client {
 	SysInfo si = null;
 	String serverip = "";
 	int port = 0;
+	int id = 0;
 	NodeTaskTracker tracker = null;
 	int serviceDemoJvmid = -1;
 	boolean serviceDemoIsRunning = false;
@@ -114,14 +112,21 @@ public class Node extends Client {
 			System.out.println("[Node]message is none!");
 			return false;
 		}
-		if (message.getArgs() != null) {
-			args = message.getArgs().toStringUtf8().split(" ");
-		}
 		/*
 		 * we need to unpack the received packet and check the command !
 		 */
+		if (message.getArgs() != null) {
+			args = message.getArgs().toStringUtf8().split(" ");
+		}
 		int opt = message.getCommand();
 		switch (opt) {
+		case BasicMessage.OP_LOGIN:
+			ml.log("messge from server ,[login] the node,id is:"+args[0]);
+			id = Integer.parseInt(args[0]);
+			RpcClient rpcclient = RpcClient.getInstance();
+			Object[] params = new Object[]{id,InetAddress.getLocalHost().getHostAddress()};
+			rpcclient.execute("HostHandler.newHost", params);
+			return true;
 		case BasicMessage.OP_CLOSE:
 			ml.log("messge from server ,[close] the node");
 			packet one = PacketProtocolImpl.CreatePacket(BasicMessage.NODE, BasicMessage.OP_QUIT);

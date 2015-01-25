@@ -52,24 +52,31 @@ public class MetrixCircle extends Thread{
 		A.pointTo(B);
 		B.pointTo(A);
 	}
+	public HostMetrix findHost(int id){
+		return (HostMetrix)HOST.find(id);
+	}
 	public ChildMetrix findChild(int id){
 		return (ChildMetrix)CHILD.find(id);
 	}
 	public TaskMetrix findTask(int id){
 		return (TaskMetrix)TASK.find(id);
 	}
+	public Object[] hosts(){
+		return HOST.IDs();
+	}
+	public Object[] childs(){
+		return CHILD.IDs();
+	}
+	public String hostSummary(){
+		return HOST.toString();
+	}
+	public String childSummary(){
+		return CHILD.toString();
+	}
+	public String taskSummary(){
+		return TASK.toString();
+	}
 	public Object[] retrivetasks(){
-		ArrayList<Object> info = new ArrayList<Object>();
-		synchronized(TASK){
-
-		CopyOnWriteArrayList<Metrix> tasks = TASK.splits[MCODE.FINISH];
-		int size = tasks.size();
-		for(int i = 0;i < size;i++){
-			TaskMetrix task = (TaskMetrix) tasks.get(i);
-			info.add("TASK "+task.id+ " state: "+task.state+"\n");
-		}
-		TASK.notify();
-		}
-		return info.toArray();
+		return TASK.IDs();
 	}
 }

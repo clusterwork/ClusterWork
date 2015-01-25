@@ -40,11 +40,20 @@ public class CommandPhraser {
 		if(s[0].equals("service")){
 			return ServiceMessage.SERVICE;
 		}
+		if(s[0].equals("hosts")){
+			return BasicMessage.HOSTS;
+		}
+		if(s[0].equals("childs")){
+			return BasicMessage.CHILDS;
+		}
 		if(s[0].equals("tasks")){
 			return BasicMessage.TASKS;
 		}
 		if(s[0].equals("taskinfo")){
 			return BasicMessage.TASKINFO;
+		}
+		if(s[0].equals("hostinfo")){
+			return BasicMessage.HOSTINFO;
 		}
 		if(s[0].equals("childinfo")){
 			return BasicMessage.CHILDINFO;

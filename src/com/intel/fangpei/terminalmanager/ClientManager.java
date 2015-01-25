@@ -9,6 +9,7 @@ import com.clusterwork.protocol.PacketProtos.packet;
 import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
 import com.intel.fangpei.network.NIOServerHandler;
 import com.intel.fangpei.network.SelectionKeyManager;
+import com.intel.fangpei.network.rpc.RpcClient;
 import com.intel.fangpei.util.SystemUtil;
 /**
  * server use this class to communicate with Node.
@@ -16,6 +17,7 @@ import com.intel.fangpei.util.SystemUtil;
  *
  */
 public class ClientManager extends SlaveManager{
+	volatile static int  nodeid = 1000;
 	public ClientManager(SelectionKeyManager keymanager,NIOServerHandler nioserverhandler) {
 		super(keymanager,nioserverhandler);
 	}
@@ -45,7 +47,8 @@ public class ClientManager extends SlaveManager{
 					return false;
 				}
 				if (command == BasicMessage.OP_LOGIN) {
-					packet p2 = PacketProtocolImpl.CreatePacket(BasicMessage.SERVER,BasicMessage.OK," You have registered as a new Node");
+					nodeid++;
+					packet p2 = PacketProtocolImpl.CreatePacket(BasicMessage.SERVER,BasicMessage.OP_LOGIN,""+nodeid);
 					nioserverhandler.pushWriteSegement(key, p2);
 					keymanager.addnode(key);
 				}

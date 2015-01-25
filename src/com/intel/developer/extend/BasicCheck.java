@@ -25,7 +25,7 @@ public class BasicCheck extends Extender{
 			e.printStackTrace();
 		}
 	}
-	public void commitTask(){
+	public void commitSplit(){
 	DirCheck.check(ml);
 	}
 

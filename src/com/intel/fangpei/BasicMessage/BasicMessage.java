@@ -24,6 +24,9 @@ public class BasicMessage {
 	public static final int OK =   7;
 	public static final int OP_SH =   12;
 	public static final int TASKS =   31;
+	public static final int HOSTS =   35;
+	public static final int CHILDS =   36;
 	public static final int TASKINFO =   32;
+	public static final int HOSTINFO =   34;
 	public static final int CHILDINFO =  33;
 }

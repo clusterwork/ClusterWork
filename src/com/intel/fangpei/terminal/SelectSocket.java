@@ -1,21 +1,5 @@
 package com.intel.fangpei.terminal;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.nio.channels.ClosedChannelException;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
-import java.util.Iterator;
-import java.util.Map;
-
-import org.apache.commons.logging.Log;
-
 import com.intel.fangpei.logfactory.MonitorLog;
 import com.intel.fangpei.network.NIOServerHandler;
 import com.intel.fangpei.network.SelectionKeyManager;

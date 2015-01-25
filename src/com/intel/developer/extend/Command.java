@@ -9,7 +9,7 @@ public class Command  extends Extender{
 public Command(String paras){
 	this.paras = paras;
 }
-public void commitTask(){
+public void commitSplit(){
 	int procid = ProcessFactory.buildNewProcess(paras);
 	System.out.println("command process start!");
 	ProcessManager.start(procid);

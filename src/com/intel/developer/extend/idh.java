@@ -18,7 +18,7 @@ public class idh extends Extender{
 	public idh(String s1){
 		this.command1 = s1;
 	}
-	public void commitTask(){
+	public void commitSplit(){
 	if(command1.equalsIgnoreCase("stop")){
 		if(command2.equalsIgnoreCase("hbase")){
 		StartStop.check(1);	

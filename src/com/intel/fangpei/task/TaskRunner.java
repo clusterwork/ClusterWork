@@ -76,8 +76,10 @@ public class TaskRunner implements Runnable {
 	/*
 	 * 3.add JvmTask to the TaskRunner
 	 */
-	private ChildWork expandNewJvm(TaskEnv env,ChildStrategy childStrategy) {
-		JvmRunner jvm = new JvmRunner("127.0.0.1", 4399);
+	private ChildWork expandNewJvm(TaskEnv env,int hostid,ChildStrategy childStrategy) {
+		Object[] params = new Object[]{hostid};
+		String ip = (String)rpc.execute("HostHandler.getHost", params);
+		JvmRunner jvm = new JvmRunner(ip, 4399);
 		// jvm.setDaemon(true);
 		jvm.start();
 
@@ -106,8 +108,8 @@ public class TaskRunner implements Runnable {
 		return jvmtask;
 	}
 
-	private synchronized ChildWork expandNewJvm(ChildStrategy childStrategy) {
-		return expandNewJvm(null,childStrategy);
+	private synchronized ChildWork expandNewJvm(int hostid,ChildStrategy childStrategy) {
+		return expandNewJvm(null,hostid,childStrategy);
 	}
 
 	public void removeJvm(int jvmId) {
@@ -267,7 +269,7 @@ public class TaskRunner implements Runnable {
 					ChildWork childwork = idToChildWork.get(ids[i]);
 					// if is been killed ,removeJVM
 					if ((Boolean) RpcClient.getInstance().execute(
-							"TaskChildHandler.iskilled",
+							"ChildHandler.iskilled",
 							new Object[] { (Integer) ids[i] })) {
 						innormalKilled.put(childwork.jvmId, idToStrategy.get(childwork.jvmId));//added20140428
 						//add rpc remove childid^^^^^^^^^^^^^^^^.
@@ -329,9 +331,13 @@ public class TaskRunner implements Runnable {
 			if (childs.get(child).equals(true)) {
 				continue;
 			}
-			ChildWork childwork = expandNewJvm(child);
+			Object[] hosts = (Object[])rpc.execute("HostHandler.getHosts", new Object[]{});
+			System.out.println("[TaskRunner]get one hosts:"+hosts[0]);
+			//#TODO
+			int hostid = (Integer)hosts[0];
+			ChildWork childwork = expandNewJvm(hostid,child);
 			int jvmid = childwork.getId();
-			rpc.execute("TaskChildHandler.registeChild", new Object[]{taskid,jvmid});
+			rpc.execute("ChildHandler.registeChild", new Object[]{hostid,taskid,jvmid});
 			Line<String, String[]> loads = child.getLoads();
 			while (loads.hasNext()) {
 				segment load = loads.popNode();
@@ -341,12 +347,12 @@ public class TaskRunner implements Runnable {
 				// }
 				tmpchild.setArgs((String[]) load.v);
 				childwork.assignNewSplit(new SplitId(), tmpchild);
-				rpc.execute("TaskChildHandler.addsplit",new Object[]{jvmid,(String) load.k,(String[]) load.v});
+				rpc.execute("ChildHandler.addsplit",new Object[]{jvmid,(String) load.k,(String[]) load.v});
 			}
 			// get last work of the JVM
 			childwork.assignNewSplit(new SplitId(),
 					new SplitWork(child.getLastWork()));
-			rpc.execute("TaskChildHandler.addsplit",new Object[]{jvmid,child.getLastWork(),null});	
+			rpc.execute("ChildHandler.addsplit",new Object[]{jvmid,child.getLastWork(),null});	
 			
 //			child.startStrategyRunner(boss, jvmtask);
 			childs.put(child, true);

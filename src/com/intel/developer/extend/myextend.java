@@ -5,14 +5,20 @@ public class myextend extends Extender {
 	public myextend(){
 		System.out.println("nothing to do!");
 	}
-	//支持传入参数，但是参数只能是String类型；
 	public myextend(String s){
 		System.out.println(s);
 	}
 	public myextend(String s,String s2){
 		System.out.println(s+"~"+s2);
 	}
-	public void commitTask(){
+	public void commitSplit(){
 		System.out.println("work over!");
+		super.setCompletePercent(0.90);
+		try {
+			Thread.sleep(30000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

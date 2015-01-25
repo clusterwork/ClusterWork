@@ -15,7 +15,7 @@ import com.intel.fangpei.util.ConfManager;
 
 public class TestRetryChildStrategy {
 
-	/**°ÑMyChildStrategy2µÄµÚ54ÐÐ"return true"¸Ä³É"return false"£¬ÔËÐÐ´Î²âÊÔÓÃÀý£¬½«ÖØ¸´´òÓ¡Á½´Î1:1µ½1:5
+	/**ï¿½ï¿½MyChildStrategy2ï¿½Äµï¿½54ï¿½ï¿½"return true"ï¿½Ä³ï¿½"return false"ï¿½ï¿½ï¿½ï¿½ï¿½Ð´Î²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø¸ï¿½ï¿½ï¿½Ó¡ï¿½ï¿½ï¿½ï¿½1:1ï¿½ï¿½1:5
 	 * change <class>MyChilStrategy2<class> 54 line from "return true" to "return false",
 	 * run this demo will print twice from 1:1 to 1:5
 	 * @param args
@@ -58,8 +58,8 @@ public class TestRetryChildStrategy {
 			int id = ProcessFactory.getProcessNum();
 			Object [] params = {id};
 			Thread.sleep(1000);
-			client.execute("TaskChildHandler.setChildKilled", params);
-			String function = "TaskChildHandler.iskilled";
+			client.execute("ChildHandler.setChildKilled", params);
+			String function = "ChildHandler.iskilled";
 			boolean result = (Boolean) client.execute(function,
 					params);
 			System.out.println("--------------------------------------");

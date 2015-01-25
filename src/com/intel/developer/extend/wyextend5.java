@@ -15,7 +15,7 @@ public class wyextend5 extends Extender {
 	public wyextend5(String s,String s2){
 		System.out.println(s+"~"+s2);
 	}
-	public void commitTask(){
+	public void commitSplit(){
 		for(int i=1;i<=5;i++){
 			System.out.println("5:"+i);
 			try {

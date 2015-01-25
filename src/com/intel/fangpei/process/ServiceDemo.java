@@ -77,10 +77,10 @@ public class ServiceDemo {
 	        	ExtendTask task = null;
 	        	if(taskArgs.length > 1){
 	        	String[] otherArgs = (String[]) ArrayUtils.subarray(taskArgs, 1, taskArgs.length);
-	        	task = new ExtendTask(ml,taskname,otherArgs);
+	        	task = new ExtendTask(0,null,ml,taskname,otherArgs);
 	        	ml.log("Service Demo Receive:extend task with args");
 	        	}else{
-	        	task = new ExtendTask(ml,taskname);
+	        	task = new ExtendTask(0,null,ml,taskname);
 	        	}
 //	        	Thread workthread = new Thread(task);
 //	        	workthread.setName("service");

@@ -8,9 +8,6 @@ import java.util.Set;
 public class MyChildStrategy extends ChildStrategy {
 	private int flag = 0;
 
-	/**
-	 * 绫诲悕+鈥�txt鈥濆緱鍒扮殑鏂囦欢瀛樻斁浠诲姟杩愯缁撴灉锛屽鏋滃唴瀹规槸end琛ㄧず鍙互缁х画鍋氫笅涓�釜浠诲姟
-	 */
 	public  boolean canDoNextWork(){
 		if(flag ==0){
 			flag = 1;

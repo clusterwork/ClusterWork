@@ -52,7 +52,8 @@ public void StartRPCServer(){
      
    
     try {
-		phm.addHandler("TaskChildHandler", TaskChildHandler.class);
+    	phm.addHandler("HostHandler", HostHandler.class);
+		phm.addHandler("ChildHandler", ChildHandler.class);
 		phm.addHandler("TaskHandler", TaskHandler.class);
 		
 	} catch (XmlRpcException e1) {

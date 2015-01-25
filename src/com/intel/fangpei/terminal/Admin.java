@@ -2,7 +2,6 @@ package com.intel.fangpei.terminal;
 
 import java.nio.ByteBuffer;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -11,9 +10,9 @@ import com.intel.fangpei.BasicMessage.ServiceMessage;
 //import com.intel.fangpei.BasicMessage.packet;
 import com.clusterwork.protocol.PacketProtos.packet;
 import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
-import com.intel.fangpei.network.HeartBeatThread;
 import com.intel.fangpei.network.NIOAdminHandler;
 import com.intel.fangpei.network.rpc.RpcClient;
+import com.intel.fangpei.resource.metrix.ChildMetrix;
 import com.intel.fangpei.util.CommandPhraser;
 import com.intel.fangpei.util.ConfManager;
 /**
@@ -66,6 +65,12 @@ public class Admin extends Client {
 		if(COMMAND == BasicMessage.OP_HELP){
 			printHelp();
 		}
+		if(COMMAND == BasicMessage.HOSTS){
+			getHosts();
+		}
+		if(COMMAND == BasicMessage.CHILDS){
+			getChilds();
+		}
 		//add tasks command
 		if(COMMAND == BasicMessage.TASKS){
 			getTasks();
@@ -74,6 +79,11 @@ public class Admin extends Client {
 			int task_id = Integer.parseInt(command.substring(command.indexOf(" ")+1,
 					command.length()));
 			getTaskInfo(task_id);
+		}		
+		if(COMMAND == BasicMessage.HOSTINFO){
+			int host_id = Integer.parseInt(command.substring(command.indexOf(" ")+1,
+					command.length()));
+			getHostInfo(host_id);
 		}
 		if(COMMAND == BasicMessage.CHILDINFO){
 			int child_id = Integer.parseInt(command.substring(command.indexOf(" ")+1,
@@ -137,39 +147,52 @@ public class Admin extends Client {
 		System.out.println("quit          close the admin process");
 		System.out.println("sysinfo       get the cluster's system info");
 		System.out.println("service       execute a class which extend Extender in a Thread");
+		System.out.println("tasks         show tasks in the cluster");
+		System.out.println("taskinfo      show task info");
+	}
+	public static void getHosts(){
+		RpcClient rpcclient = RpcClient.getInstance();
+		Object[] params = new Object[]{};
+		String hosts = (String)rpcclient.execute("HostHandler.getHostSummary", params);
+		System.out.println(hosts);
+	}
+	public static void getChilds(){
+		RpcClient rpcclient = RpcClient.getInstance();
+		Object[] params = new Object[]{};
+		String childs = (String) rpcclient.execute("ChildHandler.getChildSummary", params);
+		System.out.println(childs);
 	}
 	public static void getTasks(){
 		RpcClient rpcclient = RpcClient.getInstance();
 		Object[] params = new Object[]{};
-		Object[] tasks = (Object[]) rpcclient.execute("TaskHandler.getTasks", params);
-		if(tasks.length!=0){
-			System.out.print("Tasks: \n");
-			for(int i=0;i<tasks.length-1;i++){
-				System.out.print(tasks[i]+", ");
-			}
-			System.out.println(tasks[tasks.length-1]+".");
-		}else{
-			System.out.println("There is no tasks in cluster!");
-		}
+		String tasks = (String) rpcclient.execute("TaskHandler.getTaskSummary", params);
+		System.out.println(tasks);
+		
 	}
 	public static void getTaskInfo(int task_id){
 		RpcClient rpcclient = RpcClient.getInstance();
 		Object[] params = new Object[]{task_id};
-		Map<Integer,Double> task_info = (Map<Integer,Double>)rpcclient.execute("TaskHandler.getTaskInfo", params);
-		Iterator<Entry<Integer,Double>> itr = task_info.entrySet().iterator();
+		Map<Integer,String> task_info = (Map<Integer,String>)rpcclient.execute("TaskHandler.getTaskInfo", params);
+		Iterator<Entry<Integer,String>> itr = task_info.entrySet().iterator();
 		System.out.println("Task Info of  "+task_id+":\n");
 		while(itr.hasNext()){
-			Entry<Integer, Double> tmp = itr.next();
-			int child_tmp = tmp.getKey();
-			Double percent_tmp = tmp.getValue()*100;
-			System.out.println("Child: "+child_tmp+", complete "+percent_tmp+"%");
+			Entry<Integer, String> tmp = itr.next();
+			int id = tmp.getKey();
+			String metix = tmp.getValue();
+			System.out.println("Child: "+id+", metrix: "+metix);
 		}
 		System.out.println("------------------------------");
+	}
+	public static void getHostInfo(int host_id){
+		RpcClient rpcclient = RpcClient.getInstance();
+		Object[] params = new Object[]{host_id};
+		String childinfo = (String) rpcclient.execute("HostHandler.getHost", params);
+		System.out.println(childinfo);
 	}
 	public static void getChildInfo(int child_id){
 		RpcClient rpcclient = RpcClient.getInstance();
 		Object[] params = new Object[]{child_id};
-		String childinfo = (String) rpcclient.execute("TaskChildHandler.getChildInfo", params);
+		String childinfo = (String) rpcclient.execute("ChildHandler.getChildInfo", params);
 		System.out.println(childinfo);
 	}
 	public static void main(String[] args) {

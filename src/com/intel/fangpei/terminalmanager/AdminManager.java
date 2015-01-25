@@ -59,7 +59,6 @@ public class AdminManager extends SlaveManager {
 
 	public boolean Handle(SelectionKey admin, packet p) {
 		buffer = p;
-		// System.out.println("task"+buffer.mark()+" "+buffer.limit()+" "+buffer.remaining());
 		unpacket();
 		if (args != null)
 			System.out.println("[AdminManager]"
@@ -127,7 +126,6 @@ public class AdminManager extends SlaveManager {
 			packet reply = PacketProtocolImpl.CreatePacket(BasicMessage.SERVER, BasicMessage.OK);
 			nioserverhandler.pushWriteSegement(admin, reply);
 			break;
-
 		}
 		return "";
 	}

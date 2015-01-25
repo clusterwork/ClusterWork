@@ -1,6 +1,8 @@
 package com.intel.fangpei.resource.metrix;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.intel.fangpei.resource.metrix.HostMetrix;
 import com.intel.fangpei.resource.metrix.Metrix;
@@ -14,6 +16,7 @@ public class ChildMetrix extends Metrix{
 	String working = "";
 	//already complete loads;
 	Line<String,String[]> splits = new Line<String,String[]>();
+	Map<String,Double> splitProcess = new HashMap<String,Double>();
 	int completeworks = 0;
 	long start = 0; 
 	long down = 0; 
@@ -42,6 +45,9 @@ public class ChildMetrix extends Metrix{
 		}
 		working+="+"; 
 	}
+	public void setProcess(String classname,Double percent){
+		splitProcess.put(classname, percent);
+	}
 	public void completeone(){
 		completeworks ++;
 		working = working.substring(1);
@@ -64,5 +70,15 @@ public class ChildMetrix extends Metrix{
 			works+=splits.get(i).k+" ";
 		}
 		return works;
+	}
+	public String toString(){
+		return "State:" + MCODE.CODESTR.getName(state) +
+	            "\nWorking:"+working+
+				"\nSplit Names:"+ works() +
+				"\nCompleteNum:"+ completeworks+ 
+				"\nLoadNum:"+loads+
+				"\nStartTime:"+start+
+				"\nDownTime:"+down+
+				"\nSplit Compelete Percent:"+percent();
 	}
 }

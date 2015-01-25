@@ -18,10 +18,10 @@ public class RPCTest {
 		c1.execute("TaskHandler.NotifyNodeTimeout", params);
 		params = new Object[] 
 		        { new Integer(2),new Integer(1), new Double(1), }; 
-		c1.execute("TaskChildHandler.registeChild", params);
+		c1.execute("ChildHandler.registeChild", params);
 		params = new Object[] 
 		        { new Integer(2),new Integer(2), new Double(0.1), }; 
-		c1.execute("TaskChildHandler.registeChild", params);
+		c1.execute("ChildHandler.registeChild", params);
 		params = new Object[] 
 		        { new Integer(2) }; 
 		Integer result = (Integer) c1.execute("TaskHandler.getTaskCompleteNum", params); 

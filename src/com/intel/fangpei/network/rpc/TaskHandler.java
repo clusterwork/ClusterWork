@@ -3,6 +3,7 @@ package com.intel.fangpei.network.rpc;
 import java.util.List;
 import java.util.Map;
 
+import com.intel.fangpei.resource.metrix.ChildMetrix;
 import com.intel.fangpei.terminalmanager.AdminManager;
 
 public class TaskHandler {
@@ -22,7 +23,10 @@ public class TaskHandler {
 	public Object[] getTasks(){
 		return stm.getTasks();
 	}
-	public Map<Integer,Double> getTaskInfo(int task_id){
+	public String getTaskSummary(){
+		return stm.getTaskSummary();
+	}
+	public Map<Integer, String> getTaskInfo(int task_id){
 		return stm.getTaskInfo(task_id);
 	}
 	//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

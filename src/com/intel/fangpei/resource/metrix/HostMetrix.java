@@ -9,11 +9,16 @@ import com.intel.fangpei.resource.metrix.TaskMetrix;
 
 public class HostMetrix extends Metrix{
 	Date start = null; 
-	Date down = null; 
+	Date down = null;
+	String ip = "0.0.0.0";
 	CopyOnWriteArrayList<ChildMetrix> childs = new CopyOnWriteArrayList<ChildMetrix>();
 	CopyOnWriteArrayList<TaskMetrix> tasks = new CopyOnWriteArrayList<TaskMetrix>();
-	public HostMetrix(int hostid){
+	public HostMetrix(int hostid,String ip){
 		id = hostid;
+		this.ip = ip;
+	}
+	public String getIp(){
+		return ip;
 	}
 	public void pointTo(Metrix metrix){
 		if ( metrix.getClass() == TaskMetrix.class ){

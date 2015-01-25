@@ -27,13 +27,13 @@ public class TaskMetrix extends Metrix{
 		}
 		state = MCODE.FINISH;
 	}
-	public Map<Integer, Double> taskchildinfo(){
-		Map<Integer, Double> map = new HashMap<Integer, Double>();
+	public Map<Integer, String> taskchildinfo(){
+		Map<Integer, String> map = new HashMap<Integer, String>();
 		int childnum = childs.size();
 		ChildMetrix tmp = null;
 		for (int p = 0;p < childnum; p++){
 			tmp = childs.get(p);
-			map.put(tmp.id, tmp.percent());		
+			map.put(tmp.id, tmp.works()+" "+tmp.percent());		
 		}
 		return map;
 	}

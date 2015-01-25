@@ -18,11 +18,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 public class test2 {
-
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		
 		ArrayList<Future<?>> splitFuture = new ArrayList<Future<?>>();
 	    ExecutorService executorService = Executors.newCachedThreadPool();; 
 		Thread t = new Thread() {

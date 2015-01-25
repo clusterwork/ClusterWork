@@ -5,23 +5,32 @@ import java.nio.channels.SelectionKey;
 import com.intel.fangpei.terminalmanager.AdminManager;
 import com.intel.fangpei.util.Line;
 
-public class TaskChildHandler {
+public class ChildHandler {
 	private ServerRunningResource stm;
-	public TaskChildHandler(){
+	public ChildHandler(){
 		stm  = ServerRunningResource.getServerTaskMonitorInstance();
 	}
 	
-	public boolean registeChild(int taskid, int childid){
-		stm.initChild(taskid, childid);
+	public boolean registeChild(int hostid,int taskid, int childid){
+		stm.newChild(hostid,taskid, childid);
 		return true;
+	}
+	public Object[] getChilds(){
+		return stm.getChilds();
+	}
+	public String getChildSummary(){
+		return stm.getChildSummary();
 	}
 	public boolean addsplit(int childid,String classname,String[] args){
 		stm.addLoad(childid, classname, args);
 		return true;
 	}
 	public boolean startsplit(int childid){
-		
 		stm.startone(childid);
+		return true;
+	}
+	public boolean splitPercent(int childid,String classname,Double percent){
+		stm.processone(childid,classname,percent);
 		return true;
 	}
 	public boolean completesplit(int childid){

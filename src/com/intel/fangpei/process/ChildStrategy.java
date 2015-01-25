@@ -101,7 +101,7 @@ public class ChildStrategy extends Thread{
 						boss.report("[ChildStrategy]assign new task, thename is:"
 								+ splitwork.taskname);
 						//registe start of the child split
-						rpc.execute("TaskChildHandler.startsplit", new Object[]{childwork.jvmId});
+						rpc.execute("ChildHandler.startsplit", new Object[]{childwork.jvmId});
 						System.out.println("[ChildStartegy]assign new task");
 					}
 				}

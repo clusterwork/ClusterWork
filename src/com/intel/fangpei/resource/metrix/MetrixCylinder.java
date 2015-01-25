@@ -1,5 +1,6 @@
 package com.intel.fangpei.resource.metrix;
 
+import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.intel.fangpei.resource.metrix.Metrix;
@@ -78,6 +79,28 @@ public class MetrixCylinder {
 		}
 		splits[state].add(metrix);
 		return metrix;
+	}
+	public Object[] IDs(){
+		ArrayList<Integer> ids = new ArrayList<Integer>();
+		for (int stateid = 0;stateid < splitNum;stateid++){
+			CopyOnWriteArrayList<Metrix> list = splits[stateid];
+			for(Metrix metrix:list){
+				ids.add(metrix.id);
+			}
+		}
+		return ids.toArray();
+	}
+	public String toString(){
+		StringBuilder builder = new StringBuilder();
+		for (int stateid = 0;stateid < splitNum;stateid++){
+			builder.append("state:"+MCODE.CODESTR.getName(stateid)+"\n");
+			CopyOnWriteArrayList<Metrix> list = splits[stateid];
+			for(Metrix metrix:list){
+				builder.append(metrix.id+" ");
+			}
+			builder.append("\n");
+		}
+		return builder.toString();
 	}
 //should support remove?
 //	public void remove(Metrix metrix){

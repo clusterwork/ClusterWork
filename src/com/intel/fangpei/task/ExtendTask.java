@@ -1,20 +1,28 @@
 package com.intel.fangpei.task;
 
 import com.intel.fangpei.logfactory.MonitorLog;
-import com.intel.fangpei.task.handler.ExtendHandleable;
+import com.intel.fangpei.network.rpc.RpcClient;
 import com.intel.fangpei.task.handler.Extender;
 import com.intel.fangpei.util.ReflectFactory;
 
-public class ExtendTask implements Task{
+public class ExtendTask implements Runnable{
+int jvmId = 0;
+RpcClient rpcClient = null;
 MonitorLog ml = null;
 ClassLoader ccl =Thread.currentThread().getContextClassLoader();
 String classname = null;
 String args[] = null;
-public ExtendTask(MonitorLog ml,String classname){
+Extender eh = null;
+double completePercent = 0.0;
+public ExtendTask(int jvmId,RpcClient rpcClient,MonitorLog ml,String classname){
+	this.jvmId = jvmId;
+	this.rpcClient =rpcClient;
 	this.ml = ml;
 	this.classname = classname;
 }
-public ExtendTask(MonitorLog ml,String classname,String[] args){
+public ExtendTask(int jvmId,RpcClient rpcClient,MonitorLog ml,String classname,String[] args){
+	this.jvmId = jvmId;
+	this.rpcClient =rpcClient;
 	this.ml = ml;
 	this.classname = classname;
 	this.args = args;
@@ -22,8 +30,8 @@ public ExtendTask(MonitorLog ml,String classname,String[] args){
 public String taskname(){
 	return classname;
 }
+@Override
 public void run() {
-	Extender eh = null;
 	ReflectFactory rf = ReflectFactory.getInstance();
 	try{
 		if(args == null){
@@ -40,26 +48,27 @@ public void run() {
 			ml.error("no command named:"+classname.replace("com.intel.developer.extend.", ""));
 		}
 	}
-	eh.run();
-//	if(eh == null)System.out.println("[error]cannot get instance");
-//	Thread t = new Thread(eh);
-//	t.start();
-//	while(true){
-//		ml.log("your task have completed: "+eh.taskCompletePercent());
-//		ml.log("[extend log] "+eh.reportStatus());
-//		try {
-//			Thread.sleep(5000);
-//		} catch (InterruptedException e) {
-//			ml.error(e.getMessage());
-//			return;
-//		}
-//		if(eh.taskCompletePercent() >0.99999999){
-//			ml.log("[extend log] "+eh.reportStatus());
-//			ml.log("complete!");
-//			break;
-//		}
-//	}
+	eh.commit();	
 	
+}
+public boolean setCompletePercent(){
+	if(eh == null){
+		return false;
+	}
+	double percent = eh.getCompletePercent();
+	if(completePercent == percent){
+		ml.log("same percent,so not report!");
+		return false;
+	}
+	Object[] params = new Object[] { jvmId,classname,percent };
+	rpcClient.execute("ChildHandler.splitPercent", params);
+	
+	if(percent > 0.99999){
+		params = new Object[] { jvmId };
+		rpcClient.execute("ChildHandler.completesplit", params);
+	}
+	completePercent = percent;
+	return percent > 0.99999;
 }
 
 }

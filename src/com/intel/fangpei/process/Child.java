@@ -25,8 +25,8 @@ public class Child {
     private static ExecutorService executorService; 
 	public static void main(String[] args) throws Throwable {
 		// start init
-		//ml = new MonitorLog("/tmp/log/childlog");
-		ml = new MonitorLog("c:/childlog");
+		ml = new MonitorLog("/tmp/log/childlog");
+//		ml = new MonitorLog("c:/childlog");
 		ml.log("a new child is in construct...");
 		ConfManager.addResource(null);
 		String serverip = args[0];
@@ -50,12 +50,12 @@ public class Child {
 		ml.log("child args is : " + head.getArgs().toStringUtf8());
 		taskid = heads[0];
 		jvmId = heads[1];
-		SplitExecutor executor = new SplitExecutor(Integer.parseInt(jvmId));
+		SplitExecutor executor = new SplitExecutor(Integer.parseInt(jvmId),ml);
 		// use RPC to registe this child to RPCServer
 		RpcClient rpcClient = RpcClient.getInstance();
 		Object[] params = new Object[] { Integer.parseInt(taskid),
 				Integer.parseInt(jvmId)};
-//		rpcClient.execute("TaskChildHandler.registeChild", params);
+//		rpcClient.execute("ChildHandler.registeChild", params);
 		// final String logLocation = args[3];
 		// int jvmIdInt = Integer.parseInt(jvmId);
 		// String cwd = System.getenv().get(TaskRunner.TASK_WORK_DIR);
@@ -72,7 +72,7 @@ public class Child {
 						RpcClient rpcClient = RpcClient.getInstance();
 						Object[] params = new Object[] { Integer
 								.parseInt(jvmId) };
-						rpcClient.execute("TaskChildHandler.setChildKilled",
+						rpcClient.execute("ChildHandler.setChildKilled",
 								params);
 						// add shutdown hook context;
 					}
@@ -107,7 +107,7 @@ public class Child {
 				Thread.sleep(millis);
 				continue;
 			} else {
-				System.out.println("child " + jvmId + " recevied:"
+				ml.log("child " + jvmId + " recevied:"
 						+ inprocessTaskPacket);
 				String taskArgsString = inprocessTaskPacket.getArgs().toStringUtf8();
 				String[] taskArgs = taskArgsString.trim().split(" ");
@@ -127,12 +127,9 @@ public class Child {
 					node.flush();
 					//Thread.sleep(1000);
 					while (true) {
-						//while (node.getReceivePacket() != null)
-						//	;
 						// use rpc to registe the child complete percent.
-
 						params = new Object[] { Integer.parseInt(jvmId) };
-						rpcClient.execute("TaskChildHandler.completesplit",
+						rpcClient.execute("ChildHandler.completesplit",
 								params);
 						//wait for server cancel key
 						Thread.sleep(1000);

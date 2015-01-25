@@ -3,6 +3,7 @@ package com.intel.fangpei.network.rpc;
 import java.util.Map;
 
 import com.intel.fangpei.resource.metrix.ChildMetrix;
+import com.intel.fangpei.resource.metrix.HostMetrix;
 import com.intel.fangpei.resource.metrix.MCODE;
 import com.intel.fangpei.resource.metrix.MetrixCircle;
 import com.intel.fangpei.resource.metrix.TaskMetrix;
@@ -21,12 +22,29 @@ public class ServerRunningResource {
 		private TaskMetrix taskhandler = null;
 //		private ChildMetrix childhandler = null;
 //		private HostMetrix hosthandler = null;
-		
+	
+		//Host RPC METHOD
+		public void newHost(int hostid,String ip){
+			HostMetrix host = new HostMetrix(hostid,ip);
+			circle.newHost(host, MCODE.OTHER);
+		}
+		public String getHost(int hostid){
+			return circle.findHost(hostid).getIp();
+		}
+		//task RPC METHOD
+		public boolean newTask(int taskid) {
+			System.out.println("[AdminManager] new task"+taskid);
+			taskhandler = new TaskMetrix(taskid);
+			circle.newTask(taskhandler,MCODE.OTHER);
+			return true;
+		}
 		//Child RPC METHOD
-		public void initChild(int taskid,int childid){
+		public void newChild(int hostid,int taskid,int childid){
 			ChildMetrix child = new ChildMetrix(childid);
 			circle.newChild(child, MCODE.OTHER);
+			circle.connect(circle.findHost(hostid), circle.findChild(childid));
 			circle.connect(circle.findChild(childid), circle.findTask(taskid));
+			circle.connect(circle.findTask(taskid), circle.findHost(hostid));
 		}
 		public void addLoad(int childid,String classname,String[] args){
 			ChildMetrix child= circle.findChild(childid);
@@ -37,7 +55,14 @@ public class ServerRunningResource {
 			if (child!=null)
 				child.startone();
 			else
-				System.out.println("*******************************8");
+				System.out.println("*******************************not found child*******");
+		}
+		public void processone(int childid,String classname,Double percent){
+			ChildMetrix child = circle.findChild(childid);
+			if (child!=null)
+				child.setProcess(classname, percent);
+			else
+				System.out.println("*******************************not found child*******");
 		}
 		public void completeone(int childid) {
 			ChildMetrix child = circle.findChild(childid);
@@ -61,31 +86,31 @@ public class ServerRunningResource {
 		}
 		public String getChildInfo(int childid){
 			ChildMetrix child = circle.findChild(childid);
-			return "state:"+child.state+"\npercent:"+child.percent()+"\nworks:"+child.works();
-		}
-		//task RPC METHOD
-		public boolean newTask(int taskid) {
-			System.out.println("[AdminManager] new task"+taskid);
-			taskhandler = new TaskMetrix(taskid);
-			circle.newTask(taskhandler,MCODE.OTHER);
-			return true;
+			return child.toString();
 		}
 		public boolean isComplete(int taskid) {
 			
             return circle.findTask(taskid).state == MCODE.FINISH;
 		}
-
-//		public double getChildPercent(int childid) {
-//			
-//			return circle.findChild(childid).percent();
-//
-//		}
-		//only finish task getter
+		public Object[] getHosts(){
+			return circle.hosts();
+		}
+		public Object[] getChilds(){
+			return circle.childs();
+		}
+		public String getHostSummary(){
+			return circle.hostSummary();
+		}
+		public String getChildSummary(){
+			return circle.childSummary();
+		}
+		public String getTaskSummary(){
+			return circle.taskSummary();
+		}
 		public Object[] getTasks(){
 			return circle.retrivetasks();
-			
 		}
-		public Map<Integer, Double> getTaskInfo(int taskid){
+		public Map<Integer, String> getTaskInfo(int taskid){
 
 			TaskMetrix task = circle.findTask(taskid);
 			return task.taskchildinfo();

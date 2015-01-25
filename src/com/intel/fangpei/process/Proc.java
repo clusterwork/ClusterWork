@@ -122,11 +122,10 @@ while(true){
 		process.destroy();
 		try {
 			exitVal = process.waitFor();
-			//�½�rpcclient������ע��child������Ϣ������child��ʼ���У��ٷֱ���0
 //			RpcClient rpcClient = RpcClient.getInstance();
 //			Object[] params = new Object[] 
 //			        { new Integer(process.),new Integer(processid), new Double(0.0)}; 
-//			rpcClient.execute("TaskChildHandler.registeChild", params);
+//			rpcClient.execute("ChildHandler.registeChild", params);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

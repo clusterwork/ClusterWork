@@ -3,7 +3,7 @@ package com.intel.fangpei.task.handler;
 import com.intel.fangpei.task.DataSourcePool;
 import com.intel.fangpei.terminal.Node;
 
-public abstract class ExtendR<type extends Object> implements ExtendHandleable {
+public abstract class ExtendR<type extends Object> implements ExtendAttr {
 	Node node = null;
 	private String sourceSpaceID = null;
 	DataSourcePool<type> buffer = null;
@@ -12,7 +12,7 @@ public abstract class ExtendR<type extends Object> implements ExtendHandleable {
 		this.sourceSpaceID = sourceSpaceID;
 	}
 	@Override
-	public double taskCompletePercent() {
+	public double getCompletePercent() {
 		return percent;
 	}
 	public void setFather(Node node){
@@ -25,11 +25,11 @@ public abstract class ExtendR<type extends Object> implements ExtendHandleable {
 	}
 
 	public void run() {
-		commitTask();
+		commitSplit();
 		percent = 1.0;
 	}
 
 	@Override
-	public abstract void commitTask();
+	public abstract void commitSplit();
 
 }

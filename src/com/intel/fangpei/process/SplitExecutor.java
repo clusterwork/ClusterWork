@@ -16,14 +16,9 @@ public class SplitExecutor {
 	int jvmId = 0;
 	private ArrayList<SplitWork> works = new ArrayList<SplitWork>();
 	RpcClient rpcClient = RpcClient.getInstance();
-	public SplitExecutor(int jvmId){
+	public SplitExecutor(int jvmId,MonitorLog ml){
 		this.jvmId = jvmId;
-		try {
-			ml = new MonitorLog("/tmp/log/childlog");
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		this.ml = ml;
 	}
 	public class SplitWork extends Thread{
 		Thread workthread = null;
@@ -33,25 +28,27 @@ public class SplitExecutor {
 			if (taskArgs.length > 1) {
 				String[] otherArgs = (String[]) ArrayUtils.subarray(
 						taskArgs, 1, taskArgs.length);
-				task = new ExtendTask(ml, taskname, otherArgs);
+				task = new ExtendTask(jvmId,rpcClient,ml, taskname, otherArgs);
 				System.out.println("extend task with args");
 			} else {
-				task = new ExtendTask(ml, taskname);
+				task = new ExtendTask(jvmId,rpcClient,ml, taskname);
 			}
 //			workthread = new Thread(task);
 //			workthread.setName("child jvm work thread");
 		}
 		public void run(){
-			task.run();
-//			workthread.start();
-//			try {
-//				workthread.join();
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-			Object[] params = new Object[] { jvmId };
-			rpcClient.execute("TaskChildHandler.completesplit", params);				
+			new Thread(task).start();
+			while(true){
+				if(task.setCompletePercent()){
+					break;
+				}
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 		public void flush(){
 			try {
