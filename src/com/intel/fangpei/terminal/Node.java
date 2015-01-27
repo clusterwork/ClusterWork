@@ -125,7 +125,7 @@ public class Node extends Client {
 			id = Integer.parseInt(args[0]);
 			RpcClient rpcclient = RpcClient.getInstance();
 			Object[] params = new Object[]{id,InetAddress.getLocalHost().getHostAddress()};
-			rpcclient.execute("HostHandler.newHost", params);
+			rpcclient.execute("HostHandler.runningHost", params);
 			return true;
 		case BasicMessage.OP_CLOSE:
 			ml.log("messge from server ,[close] the node");

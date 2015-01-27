@@ -24,9 +24,17 @@ public class ServerRunningResource {
 //		private HostMetrix hosthandler = null;
 	
 		//Host RPC METHOD
-		public void newHost(int hostid,String ip){
-			HostMetrix host = new HostMetrix(hostid,ip);
-			circle.newHost(host, MCODE.OTHER);
+		public HostMetrix newHost(int hostid,String ip){
+			HostMetrix host = null;
+			if ((host=circle.findHost(hostid))!=null){
+				return host;
+			}
+			host = new HostMetrix(hostid,ip);
+			circle.newHost(host, MCODE.INIT);
+			return host;
+		}
+		public void runningHost(int hostid,String ip){
+			newHost(hostid,ip).state = MCODE.RUNNING;
 		}
 		public String getHost(int hostid){
 			return circle.findHost(hostid).getIp();

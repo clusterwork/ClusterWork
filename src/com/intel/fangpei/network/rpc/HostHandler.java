@@ -11,6 +11,10 @@ public class HostHandler {
 		stm.newHost(hostid,ip);
 		return true;
 	}
+	public boolean runningHost(int hostid,String ip){
+		stm.runningHost(hostid,ip);
+		return true;
+	}
 	public String getHost(int hostid){
 		return stm.getHost(hostid);
 	}
