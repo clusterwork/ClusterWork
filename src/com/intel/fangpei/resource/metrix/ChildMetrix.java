@@ -67,15 +67,15 @@ public class ChildMetrix extends Metrix{
 	public String works(){
 		String works = "";
 		for(int i =0;i<loads;i++){
-			works+=splits.get(i).k+" ";
+			works+=splits.get(i).k+" "+ splitProcess.get(splits.get(i).k) + "\n";
 		}
 		return works;
 	}
 	public String toString(){
 		return "State:" + MCODE.CODESTR.getName(state) +
 	            "\nWorking:"+working+
-				"\nSplit Names:"+ works() +
-				"\nCompleteNum:"+ completeworks+ 
+				"\nSplit Names:\n"+ works() +
+				"CompleteNum:"+ completeworks+ 
 				"\nLoadNum:"+loads+
 				"\nStartTime:"+start+
 				"\nDownTime:"+down+
