@@ -145,7 +145,7 @@ public class Node extends Client {
 				return true;
 			}
 			if (args.length == 3) {
-				ml.log("exec 1");
+				ml.log("exec 3");
 				extendTask("com.intel.developer.extend." + args[1],args[2]);
 			} else {
 				ml.log("exec 2");
