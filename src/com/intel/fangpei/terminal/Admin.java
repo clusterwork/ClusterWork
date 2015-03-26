@@ -179,9 +179,9 @@ public class Admin extends Client {
 			Entry<Integer, String> tmp = itr.next();
 			int id = tmp.getKey();
 			String metix = tmp.getValue();
-			System.out.println("Child: "+id+", metrix: "+metix);
+			System.out.println("Child: "+id+"\nmetrix:\n"+metix);
 		}
-		System.out.println("------------------------------");
+		System.out.println("-----------------------------------------------------");
 	}
 	public static void getHostInfo(int host_id){
 		RpcClient rpcclient = RpcClient.getInstance();

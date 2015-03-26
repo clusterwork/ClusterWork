@@ -33,7 +33,7 @@ public class TaskMetrix extends Metrix{
 		ChildMetrix tmp = null;
 		for (int p = 0;p < childnum; p++){
 			tmp = childs.get(p);
-			map.put(tmp.id, tmp.works()+" "+tmp.percent());		
+			map.put(tmp.id, tmp.works()+"总完成度:"+tmp.percent());		
 		}
 		return map;
 	}

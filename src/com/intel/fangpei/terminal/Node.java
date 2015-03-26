@@ -140,13 +140,13 @@ public class Node extends Client {
 			return false;
 		case BasicMessage.OP_EXEC:
 			
-			if (args.length < 2) {
+			if (args.length < 3) {
 				ml.log("no args to exec,return");
 				return true;
 			}
-			if (args.length == 2) {
+			if (args.length == 3) {
 				ml.log("exec 1");
-				extendTask("com.intel.developer.extend." + args[1]);
+				extendTask("com.intel.developer.extend." + args[1],args[2]);
 			} else {
 				ml.log("exec 2");
 				extendTask("com.intel.developer.extend." + args[1],
@@ -253,12 +253,12 @@ public class Node extends Client {
 		tr.setTaskStrategy(strate);
 		return tr;
 	}
-	private boolean extendTask(String  classname){
+	private boolean extendTask(String  classname,String childStrate){
 		TaskRunner tr = new TaskRunner();
 		TaskStrategy strate = null;
 		strate = new TaskStrategy();
-		strate.addStrategy(tr.getDefaultStrategy(),new String[]{classname});
-		//strate.addStrategy(new MyChildStrategy(),new String[]{classname});
+//		strate.addStrategy(tr.getDefaultStrategy(),new String[]{classname});
+		strate.addStrategy(childStrate,new String[]{classname});
 
 		tr.setTaskStrategy(strate);
 		tracker.addNewTaskMonitor(tr);
