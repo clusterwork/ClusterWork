@@ -14,7 +14,6 @@ import com.intel.fangpei.BasicMessage.ServiceMessage;
 //import com.intel.fangpei.BasicMessage.packet;
 import com.clusterwork.protocol.PacketProtos.packet;
 import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
-import com.intel.fangpei.SystemInfoCollector.SysInfo;
 import com.intel.fangpei.logfactory.MonitorLog;
 import com.intel.fangpei.network.HeartBeatThread;
 import com.intel.fangpei.network.NIONodeHandler;
@@ -36,7 +35,6 @@ import com.intel.fangpei.util.SystemUtil;
  */
 public class Node extends Client {
 	MonitorLog ml = null;
-	SysInfo si = null;
 	String serverip = "";
 	int port = 0;
 	int id = 0;
@@ -62,7 +60,6 @@ public class Node extends Client {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		si = SysInfo.GetSysHandler();
 	}
 
 	@Override
@@ -146,7 +143,7 @@ public class Node extends Client {
 			}
 			if (args.length == 3) {
 				ml.log("exec 3");
-				extendTask("com.intel.developer.extend." + args[1],args[2]);
+				extendTask("com.intel.developer.extend." + args[1],"com.intel.developer.extend." + args[2]);
 			} else {
 				ml.log("exec 2");
 				extendTask("com.intel.developer.extend." + args[1],
@@ -173,20 +170,6 @@ public class Node extends Client {
 			// return true;
 			// }
 			// return true;
-		case BasicMessage.OP_SYSINFO:
-			try {
-				si.Refresh();
-				Map m = si.GetSysInfoMap();
-				// System.out.println("NetWork_FQDN:"+m.get("NetWork_FQDN"));
-				// System.out.println("NetWork_IP:"+m.get("NetWork_IP"));
-			} catch (Exception e) {
-				ml.log(e.getMessage());
-				return false;
-			}
-			packet p = PacketProtocolImpl.CreatePacket(BasicMessage.NODE, BasicMessage.OP_SYSINFO,
-					new String(si.GetSysInfoBytes()));
-			connect.addSendPacket(p);
-			return true;
 		case BasicMessage.OP_SH:
 			ml.log("excute a new single node command");
 			//add node heart beat call back operation

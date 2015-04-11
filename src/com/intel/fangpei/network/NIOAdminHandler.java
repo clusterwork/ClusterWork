@@ -9,7 +9,6 @@ import com.intel.fangpei.BasicMessage.BasicMessage;
 //import com.intel.fangpei.BasicMessage.packet;
 import com.clusterwork.protocol.PacketProtos.packet;
 import com.intel.fangpei.BasicMessage.PacketProtocolImpl;
-import com.intel.fangpei.SystemInfoCollector.SysInfo;
 import com.intel.fangpei.terminal.Admin;
 /**
  * <h2>help class</h2>
@@ -80,13 +79,6 @@ public class NIOAdminHandler extends NIOHandler {
 		int clientType = p.getClientType();
 		int command = p.getCommand();
 		byte[] args = p.getArgs().toByteArray();
-		if(command == BasicMessage.OP_SYSINFO){
-			System.out.println();
-			System.out.println("system info get(in summary):");
-			HashMap hm = SysInfo.deserialize(args);
-			System.out.println("NetWork_FQDN:"+hm.get("NetWork_FQDN"));
-			System.out.println("NetWork_IP:"+hm.get("NetWork_IP"));
-		}
 		if(command == BasicMessage.OP_MESSAGE){
 			System.out.println(new String(args));
 		}

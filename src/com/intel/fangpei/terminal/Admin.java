@@ -21,7 +21,7 @@ import com.intel.fangpei.util.ConfManager;
  *
  */
 public class Admin extends Client {
-	public static boolean debug = true;
+	public static boolean debug = false;
 	/*
 	 * buffer to buffer the packet of command packet components: [Client Type]
 	 * byte [version] int [arg size] int [command] byte [args...] byte[]
@@ -96,12 +96,9 @@ public class Admin extends Client {
 					command.substring(command.indexOf(" "),
 							command.length()));
 			}catch(IndexOutOfBoundsException e){
-				System.out.println("exec [classname]");
+				System.out.println("exec [classname] [strategy]");
 				return "";
 			}
-		}
-		if(COMMAND == BasicMessage.OP_SYSINFO){
-		one = PacketProtocolImpl.CreatePacket(BasicMessage.ADMIN,COMMAND);
 		}
 		if (COMMAND == BasicMessage.OP_CLOSE) {
 		one = PacketProtocolImpl.CreatePacket(BasicMessage.ADMIN, COMMAND);
@@ -131,21 +128,12 @@ public class Admin extends Client {
 		return "";// need to return the server's response!
 	}
 
-//	private String formString(String[] s) {
-//		StringBuilder sb = new StringBuilder();
-//		int len = s.length;
-//		for (int i = 0; i < len; i++) {
-//			sb.append(" " + s[i]);
-//		}
-//		return sb.toString();
-//	}
 	public static void printHelp(){
 		System.out.println("the command line Admin Usage:");
 		System.out.println("exec          execute a class which extend Extender");
 		System.out.println("progress      [not complete command,soon...]");
 		System.out.println("close         close the cluster's nodes demon");
 		System.out.println("quit          close the admin process");
-		System.out.println("sysinfo       get the cluster's system info");
 		System.out.println("service       execute a class which extend Extender in a Thread");
 		System.out.println("tasks         show tasks in the cluster");
 		System.out.println("taskinfo      show task info");
